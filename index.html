@@ -1,2280 +1,3496 @@
 <!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MOVEEX - ระบบจองและติดตามรถขนส่ง</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MOVEEX - ระบบจอง ติดตาม และจัดการรถขนส่ง</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css">
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css">
 
-    <style>
-        body {
-            font-family: 'Prompt', sans-serif;
-        }
-
-        #map,
-        #trackingMap {
-            height: 420px;
-            width: 100%;
-            border-radius: 1rem;
-            z-index: 1;
-        }
-
-        .leaflet-control-geocoder {
-            border-radius: .75rem !important;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,.1) !important;
-            font-family: 'Prompt', sans-serif !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-
-        .leaflet-control-geocoder-form input {
-            font-family: 'Prompt', sans-serif !important;
-            padding: 8px 12px !important;
-            outline: none !important;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 4px;
-        }
-
-        .status-line {
-            position: relative;
-        }
-
-        .status-line::before {
-            content: "";
-            position: absolute;
-            left: 15px;
-            top: 34px;
-            bottom: -28px;
-            width: 2px;
-            background: #334155;
-        }
-
-        .status-line:last-child::before {
-            display: none;
-        }
-
-        .star {
-            cursor: pointer;
-            transition: .2s;
-        }
-
-        .star:hover {
-            transform: scale(1.15);
-        }
-
-        .toast {
-            animation: slideIn .3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .pulse-dot {
-            animation: pulseDot 1.5s infinite;
-        }
-
-        @keyframes pulseDot {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(59,130,246,.5);
-            }
-            50% {
-                box-shadow: 0 0 0 10px rgba(59,130,246,0);
-            }
-        }
-    </style>
+<style>
+body{font-family:'Prompt',sans-serif}
+#map,#trackingMap{height:420px;width:100%;border-radius:1rem;z-index:1}
+.leaflet-control-geocoder{
+ border-radius:.75rem!important;
+ box-shadow:0 10px 15px -3px rgba(0,0,0,.1)!important;
+ font-family:'Prompt',sans-serif!important
+}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:#0f172a}
+::-webkit-scrollbar-thumb{background:#475569;border-radius:4px}
+.status-line{position:relative}
+.status-line:before{
+ content:"";position:absolute;left:15px;top:34px;bottom:-28px;
+ width:2px;background:#334155
+}
+.status-line:last-child:before{display:none}
+.star{cursor:pointer;transition:.2s}
+.star:hover{transform:scale(1.15)}
+.toast{animation:slideIn .3s ease-out}
+@keyframes slideIn{
+ from{opacity:0;transform:translateY(-20px)}
+ to{opacity:1;transform:translateY(0)}
+}
+.pulse-dot{animation:pulseDot 1.5s infinite}
+@keyframes pulseDot{
+ 0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,.5)}
+ 50%{box-shadow:0 0 0 10px rgba(59,130,246,0)}
+}
+.admin-sidebar{min-height:calc(100vh - 73px)}
+.modal-bg{background:rgba(2,6,23,.8)}
+</style>
 </head>
 
 <body class="bg-slate-900 text-slate-100 antialiased">
 
-<!-- ========================================================= -->
-<!-- NAVBAR -->
-<!-- ========================================================= -->
+<!-- =========================================================
+ NAVBAR
+========================================================= -->
 
-<nav class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+<nav class="bg-slate-900/95 backdrop-blur border-b border-slate-800 sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
 
-        <div onclick="switchView('landing')"
-             class="flex items-center gap-3 cursor-pointer">
+<div onclick="switchView('landing')" class="flex items-center gap-3 cursor-pointer">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+<i class="fa-solid fa-truck-fast text-white text-xl"></i>
+</div>
+<span class="font-extrabold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-400">
+MOVEEX
+</span>
+</div>
 
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <i class="fa-solid fa-truck-fast text-white text-xl"></i>
-            </div>
+<div class="hidden md:flex items-center gap-6 text-sm text-slate-300">
+<button onclick="switchView('landing')" class="hover:text-blue-400">หน้าแรก</button>
+<a href="#features" onclick="switchView('landing')" class="hover:text-blue-400">จุดเด่นบริการ</a>
+<a href="#vehicles" onclick="switchView('landing')" class="hover:text-blue-400">ประเภทรถ</a>
+<button onclick="switchView('tracking')" class="hover:text-blue-400">ติดตามการขนส่ง</button>
+</div>
 
-            <span class="font-extrabold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-400">
-                MOVEEX
-            </span>
-        </div>
+<div class="flex gap-2">
+<button onclick="switchView('tracking')"
+class="hidden sm:flex bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold items-center gap-2">
+<i class="fa-solid fa-location-crosshairs text-blue-400"></i>ติดตาม
+</button>
 
-        <div class="hidden md:flex items-center gap-7 text-sm text-slate-300">
-            <button onclick="switchView('landing')" class="hover:text-blue-400">
-                หน้าแรก
-            </button>
+<button onclick="switchView('booking')"
+class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-5 py-2.5 rounded-xl font-semibold">
+<i class="fa-solid fa-paper-plane mr-1"></i>จองรถ
+</button>
 
-            <a href="#features" onclick="switchView('landing')" class="hover:text-blue-400">
-                จุดเด่นบริการ
-            </a>
-
-            <a href="#vehicles" onclick="switchView('landing')" class="hover:text-blue-400">
-                ประเภทรถ
-            </a>
-
-            <button onclick="switchView('tracking')" class="hover:text-blue-400">
-                ติดตามการขนส่ง
-            </button>
-        </div>
-
-        <div class="flex gap-2">
-
-            <button onclick="switchView('tracking')"
-                    class="hidden sm:flex bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold items-center gap-2">
-                <i class="fa-solid fa-location-crosshairs text-blue-400"></i>
-                ติดตาม
-            </button>
-
-            <button onclick="switchView('booking')"
-                    class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-blue-600/30">
-                <i class="fa-solid fa-paper-plane mr-1"></i>
-                จองรถ
-            </button>
-
-        </div>
-    </div>
+<button onclick="switchView('adminLogin')"
+class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2.5 rounded-xl text-sm">
+<i class="fa-solid fa-user-shield text-amber-400"></i>
+<span class="hidden sm:inline ml-1">Admin</span>
+</button>
+</div>
+</div>
 </nav>
 
 
-<!-- ========================================================= -->
-<!-- LANDING -->
-<!-- ========================================================= -->
+<!-- =========================================================
+ LANDING
+========================================================= -->
 
 <div id="landingView">
 
-    <section class="relative overflow-hidden pt-16 pb-24 bg-slate-900">
-
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-900/40 via-slate-900 to-slate-900"></div>
-
-        <div class="max-w-7xl mx-auto px-4 relative z-10 grid lg:grid-cols-12 gap-12 items-center">
-
-            <div class="lg:col-span-7 text-center lg:text-left">
-
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
-                    ระบบขนส่งสินค้าดิจิทัลเต็มรูปแบบ
-                </div>
-
-                <h1 class="mt-6 text-4xl sm:text-6xl font-black leading-tight text-white">
-                    ยกระดับการขนส่ง
-                    <br>
-                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
-                        รวดเร็ว ปลอดภัย แม่นยำ
-                    </span>
-                </h1>
-
-                <p class="mt-6 text-slate-400 text-lg max-w-2xl leading-relaxed">
-                    บริการเรียกรถกระบะ รถ 6 ล้อ รถ 10 ล้อ
-                    พร้อมพนักงานยกของมืออาชีพ
-                    คำนวณราคาตามระยะทางจริง
-                    พร้อมระบบติดตามสถานะการขนส่ง
-                </p>
-
-                <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-
-                    <button onclick="switchView('booking')"
-                            class="bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-xl font-bold text-lg">
-                        เริ่มจองรถทันที
-                        <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </button>
-
-                    <button onclick="switchView('tracking')"
-                            class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-8 py-4 rounded-xl font-semibold text-lg">
-                        <i class="fa-solid fa-location-dot mr-2 text-blue-400"></i>
-                        ติดตามการขนส่ง
-                    </button>
-
-                </div>
-
-                <div class="mt-10 pt-8 border-t border-slate-800 grid grid-cols-3 gap-4">
-
-                    <div>
-                        <div class="text-2xl font-black">50,000+</div>
-                        <div class="text-xs text-slate-400">เที่ยววิ่งสำเร็จ</div>
-                    </div>
-
-                    <div>
-                        <div class="text-2xl font-black">99.8%</div>
-                        <div class="text-xs text-slate-400">ตรงต่อเวลา</div>
-                    </div>
-
-                    <div>
-                        <div class="text-2xl font-black">4.9/5</div>
-                        <div class="text-xs text-slate-400">คะแนนความพึงพอใจ</div>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Hero card -->
-
-            <div class="lg:col-span-5">
-
-                <div class="bg-slate-800/90 border border-slate-700 p-6 rounded-3xl shadow-2xl">
-
-                    <div class="flex justify-between border-b border-slate-700 pb-4 mb-5">
-
-                        <span class="font-bold">
-                            <i class="fa-solid fa-truck text-blue-400 mr-2"></i>
-                            สถานะการขนส่ง
-                        </span>
-
-                        <span class="text-xs text-emerald-400">
-                            ● กำลังดำเนินการ
-                        </span>
-
-                    </div>
-
-                    <div class="space-y-4">
-
-                        <div class="p-4 bg-slate-900 rounded-xl flex gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                                <i class="fa-solid fa-location-dot"></i>
-                            </div>
-
-                            <div>
-                                <p class="text-xs text-slate-400">จุดรับสินค้า</p>
-                                <p class="font-semibold">
-                                    นิคมอุตสาหกรรมบางปู
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="p-4 bg-slate-900 rounded-xl flex gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center">
-                                <i class="fa-solid fa-location-crosshairs"></i>
-                            </div>
-
-                            <div>
-                                <p class="text-xs text-slate-400">จุดส่งสินค้า</p>
-                                <p class="font-semibold">
-                                    อ.เมือง เชียงใหม่
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="bg-blue-950/50 border border-blue-500/30 rounded-xl p-5">
-
-                            <div class="flex justify-between">
-                                <span class="text-sm text-blue-300">
-                                    สถานะปัจจุบัน
-                                </span>
-
-                                <span class="text-blue-400 font-bold">
-                                    75%
-                                </span>
-                            </div>
-
-                            <div class="h-2 bg-slate-700 rounded-full mt-3 overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-blue-500 to-emerald-400"
-                                     style="width:75%"></div>
-                            </div>
-
-                            <p class="text-sm mt-3">
-                                🚚 กำลังจัดส่งสินค้า
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    <!-- FEATURES -->
-
-    <section id="features" class="py-20 bg-slate-950">
-
-        <div class="max-w-7xl mx-auto px-4">
-
-            <div class="text-center mb-14">
-                <p class="text-blue-400 text-xs font-bold uppercase tracking-widest">
-                    ทำไมต้องเลือกเรา
-                </p>
-
-                <h2 class="text-3xl sm:text-4xl font-extrabold mt-2">
-                    ระบบขนส่งที่ครบทุกขั้นตอน
-                </h2>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-7">
-
-                <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800">
-                    <i class="fa-solid fa-calculator text-3xl text-blue-400"></i>
-                    <h3 class="text-xl font-bold mt-5">
-                        คำนวณราคาโปร่งใส
-                    </h3>
-                    <p class="text-sm text-slate-400 mt-3">
-                        คำนวณตามระยะทางและประเภทรถแบบเรียลไทม์
-                    </p>
-                </div>
-
-                <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800">
-                    <i class="fa-solid fa-location-crosshairs text-3xl text-indigo-400"></i>
-                    <h3 class="text-xl font-bold mt-5">
-                        ติดตามรถแบบเรียลไทม์
-                    </h3>
-                    <p class="text-sm text-slate-400 mt-3">
-                        ตรวจสอบสถานะงานและตำแหน่งรถได้ตลอดการขนส่ง
-                    </p>
-                </div>
-
-                <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800">
-                    <i class="fa-solid fa-star text-3xl text-yellow-400"></i>
-                    <h3 class="text-xl font-bold mt-5">
-                        รีวิวคนขับ
-                    </h3>
-                    <p class="text-sm text-slate-400 mt-3">
-                        ให้คะแนนและแสดงความคิดเห็นหลังจบงาน
-                    </p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-    <!-- VEHICLES -->
-
-    <section id="vehicles" class="py-20 bg-slate-900">
-
-        <div class="max-w-7xl mx-auto px-4">
-
-            <div class="text-center mb-14">
-                <p class="text-blue-400 text-xs font-bold uppercase tracking-widest">
-                    ประเภทรถ
-                </p>
-
-                <h2 class="text-3xl sm:text-4xl font-extrabold mt-2">
-                    เลือกรถให้เหมาะกับงาน
-                </h2>
-            </div>
-
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
-                    <i class="fa-solid fa-truck-ramp-box text-blue-400 text-3xl"></i>
-                    <h3 class="font-bold text-lg mt-5">กระบะตู้ทึบ</h3>
-                    <p class="text-xs text-slate-400 mt-2">
-                        ไม่เกิน 1.5 ตัน
-                    </p>
-                    <p class="text-blue-400 font-bold mt-5">
-                        ฿1,500+
-                    </p>
-                </div>
-
-                <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
-                    <i class="fa-solid fa-truck-pickup text-indigo-400 text-3xl"></i>
-                    <h3 class="font-bold text-lg mt-5">กระบะคอก</h3>
-                    <p class="text-xs text-slate-400 mt-2">
-                        ไม่เกิน 2.0 ตัน
-                    </p>
-                    <p class="text-blue-400 font-bold mt-5">
-                        ฿2,500+
-                    </p>
-                </div>
-
-                <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
-                    <i class="fa-solid fa-truck-moving text-purple-400 text-3xl"></i>
-                    <h3 class="font-bold text-lg mt-5">รถ 6 ล้อ</h3>
-                    <p class="text-xs text-slate-400 mt-2">
-                        ไม่เกิน 5.0 ตัน
-                    </p>
-                    <p class="text-blue-400 font-bold mt-5">
-                        ฿4,500+
-                    </p>
-                </div>
-
-                <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
-                    <i class="fa-solid fa-truck text-amber-400 text-3xl"></i>
-                    <h3 class="font-bold text-lg mt-5">รถ 10 ล้อ</h3>
-                    <p class="text-xs text-slate-400 mt-2">
-                        ไม่เกิน 15 ตัน
-                    </p>
-                    <p class="text-blue-400 font-bold mt-5">
-                        ฿8,500+
-                    </p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-    <section class="py-16 bg-gradient-to-r from-blue-700 to-indigo-800 text-center">
-
-        <h2 class="text-3xl font-extrabold">
-            พร้อมเริ่มขนส่งสินค้าของคุณ?
-        </h2>
-
-        <p class="text-blue-100 mt-3">
-            จองรถง่าย ๆ และติดตามสถานะได้ตลอดเส้นทาง
-        </p>
-
-        <button onclick="switchView('booking')"
-                class="mt-7 bg-white text-blue-900 px-8 py-4 rounded-xl font-bold">
-            จองรถเลย
-            <i class="fa-solid fa-arrow-right ml-2"></i>
-        </button>
-
-    </section>
+<section class="relative overflow-hidden pt-16 pb-24 bg-slate-900">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-900/40 via-slate-900 to-slate-900"></div>
+
+<div class="max-w-7xl mx-auto px-4 relative z-10 grid lg:grid-cols-12 gap-12 items-center">
+
+<div class="lg:col-span-7 text-center lg:text-left">
+
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
+<span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+ระบบขนส่งสินค้าดิจิทัลเต็มรูปแบบ
+</div>
+
+<h1 class="mt-6 text-4xl sm:text-6xl font-black leading-tight text-white">
+ยกระดับการขนส่ง
+<br>
+<span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
+รวดเร็ว ปลอดภัย แม่นยำ
+</span>
+</h1>
+
+<p class="mt-6 text-slate-400 text-lg max-w-2xl leading-relaxed">
+บริการเรียกรถกระบะ รถ 6 ล้อ รถ 10 ล้อ
+พร้อมพนักงานยกของมืออาชีพ
+คำนวณราคาตามระยะทางจริง
+พร้อมระบบติดตามสถานะการขนส่ง
+</p>
+
+<div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+
+<button onclick="switchView('booking')"
+class="bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-xl font-bold text-lg">
+เริ่มจองรถทันที
+<i class="fa-solid fa-arrow-right ml-2"></i>
+</button>
+
+<button onclick="switchView('tracking')"
+class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-8 py-4 rounded-xl font-semibold text-lg">
+<i class="fa-solid fa-location-dot mr-2 text-blue-400"></i>
+ติดตามการขนส่ง
+</button>
+
+</div>
+
+<div class="mt-10 pt-8 border-t border-slate-800 grid grid-cols-3 gap-4">
+<div>
+<div id="heroJobs" class="text-2xl font-black">0</div>
+<div class="text-xs text-slate-400">เที่ยววิ่งทั้งหมด</div>
+</div>
+<div>
+<div class="text-2xl font-black">99.8%</div>
+<div class="text-xs text-slate-400">ตรงต่อเวลา</div>
+</div>
+<div>
+<div class="text-2xl font-black">4.9/5</div>
+<div class="text-xs text-slate-400">คะแนนความพึงพอใจ</div>
+</div>
+</div>
+</div>
+
+<div class="lg:col-span-5">
+<div class="bg-slate-800/90 border border-slate-700 p-6 rounded-3xl shadow-2xl">
+
+<div class="flex justify-between border-b border-slate-700 pb-4 mb-5">
+<span class="font-bold">
+<i class="fa-solid fa-truck text-blue-400 mr-2"></i>
+สถานะการขนส่ง
+</span>
+<span class="text-xs text-emerald-400">● ระบบออนไลน์</span>
+</div>
+
+<div class="space-y-4">
+
+<div class="p-4 bg-slate-900 rounded-xl flex gap-4">
+<div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+<i class="fa-solid fa-location-dot"></i>
+</div>
+<div>
+<p class="text-xs text-slate-400">จุดรับสินค้า</p>
+<p class="font-semibold">นิคมอุตสาหกรรมบางปู</p>
+</div>
+</div>
+
+<div class="p-4 bg-slate-900 rounded-xl flex gap-4">
+<div class="w-10 h-10 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center">
+<i class="fa-solid fa-location-crosshairs"></i>
+</div>
+<div>
+<p class="text-xs text-slate-400">จุดส่งสินค้า</p>
+<p class="font-semibold">อ.เมือง เชียงใหม่</p>
+</div>
+</div>
+
+<div class="bg-blue-950/50 border border-blue-500/30 rounded-xl p-5">
+<div class="flex justify-between">
+<span class="text-sm text-blue-300">สถานะปัจจุบัน</span>
+<span class="text-blue-400 font-bold">75%</span>
+</div>
+<div class="h-2 bg-slate-700 rounded-full mt-3 overflow-hidden">
+<div class="h-full bg-gradient-to-r from-blue-500 to-emerald-400" style="width:75%"></div>
+</div>
+<p class="text-sm mt-3">🚚 กำลังจัดส่งสินค้า</p>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</section>
+
+
+<!-- FEATURES -->
+
+<section id="features" class="py-20 bg-slate-950">
+<div class="max-w-7xl mx-auto px-4">
+
+<div class="text-center mb-14">
+<p class="text-blue-400 text-xs font-bold uppercase tracking-widest">ทำไมต้องเลือกเรา</p>
+<h2 class="text-3xl sm:text-4xl font-extrabold mt-2">ระบบขนส่งที่ครบทุกขั้นตอน</h2>
+</div>
+
+<div class="grid md:grid-cols-3 gap-7">
+
+<div class="bg-slate-900 p-8 rounded-2xl border border-slate-800">
+<i class="fa-solid fa-calculator text-3xl text-blue-400"></i>
+<h3 class="text-xl font-bold mt-5">คำนวณราคาโปร่งใส</h3>
+<p class="text-sm text-slate-400 mt-3">คำนวณตามระยะทางและประเภทรถ</p>
+</div>
+
+<div class="bg-slate-900 p-8 rounded-2xl border border-slate-800">
+<i class="fa-solid fa-location-crosshairs text-3xl text-indigo-400"></i>
+<h3 class="text-xl font-bold mt-5">ติดตามรถ</h3>
+<p class="text-sm text-slate-400 mt-3">ตรวจสอบสถานะงานได้ตลอดการขนส่ง</p>
+</div>
+
+<div class="bg-slate-900 p-8 rounded-2xl border border-slate-800">
+<i class="fa-solid fa-star text-3xl text-yellow-400"></i>
+<h3 class="text-xl font-bold mt-5">รีวิวคนขับ</h3>
+<p class="text-sm text-slate-400 mt-3">ให้คะแนนและแสดงความคิดเห็นหลังจบงาน</p>
+</div>
+
+</div>
+</div>
+</section>
+
+
+<!-- VEHICLES -->
+
+<section id="vehicles" class="py-20 bg-slate-900">
+<div class="max-w-7xl mx-auto px-4">
+
+<div class="text-center mb-14">
+<p class="text-blue-400 text-xs font-bold uppercase tracking-widest">ประเภทรถ</p>
+<h2 class="text-3xl sm:text-4xl font-extrabold mt-2">เลือกรถให้เหมาะกับงาน</h2>
+</div>
+
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+<div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
+<i class="fa-solid fa-truck-ramp-box text-blue-400 text-3xl"></i>
+<h3 class="font-bold text-lg mt-5">กระบะตู้ทึบ</h3>
+<p class="text-xs text-slate-400 mt-2">ไม่เกิน 1.5 ตัน</p>
+<p class="text-blue-400 font-bold mt-5">฿1,500+</p>
+</div>
+
+<div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
+<i class="fa-solid fa-truck-pickup text-indigo-400 text-3xl"></i>
+<h3 class="font-bold text-lg mt-5">กระบะคอก</h3>
+<p class="text-xs text-slate-400 mt-2">ไม่เกิน 2.0 ตัน</p>
+<p class="text-blue-400 font-bold mt-5">฿2,500+</p>
+</div>
+
+<div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
+<i class="fa-solid fa-truck-moving text-purple-400 text-3xl"></i>
+<h3 class="font-bold text-lg mt-5">รถ 6 ล้อ</h3>
+<p class="text-xs text-slate-400 mt-2">ไม่เกิน 5.0 ตัน</p>
+<p class="text-blue-400 font-bold mt-5">฿4,500+</p>
+</div>
+
+<div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
+<i class="fa-solid fa-truck text-amber-400 text-3xl"></i>
+<h3 class="font-bold text-lg mt-5">รถ 10 ล้อ</h3>
+<p class="text-xs text-slate-400 mt-2">ไม่เกิน 15 ตัน</p>
+<p class="text-blue-400 font-bold mt-5">฿8,500+</p>
+</div>
+
+</div>
+</div>
+</section>
+
+<section class="py-16 bg-gradient-to-r from-blue-700 to-indigo-800 text-center">
+<h2 class="text-3xl font-extrabold">พร้อมเริ่มขนส่งสินค้าของคุณ?</h2>
+<p class="text-blue-100 mt-3">จองรถง่าย ๆ และติดตามสถานะได้ตลอดเส้นทาง</p>
+<button onclick="switchView('booking')"
+class="mt-7 bg-white text-blue-900 px-8 py-4 rounded-xl font-bold">
+จองรถเลย <i class="fa-solid fa-arrow-right ml-2"></i>
+</button>
+</section>
 
 </div>
 
 
-<!-- ========================================================= -->
-<!-- BOOKING -->
-<!-- ========================================================= -->
+<!-- =========================================================
+ BOOKING
+========================================================= -->
 
 <div id="bookingView" class="hidden">
 
-    <div class="bg-slate-900 border-b border-slate-800 py-7 px-4">
+<div class="bg-slate-900 border-b border-slate-800 py-7 px-4">
+<div class="max-w-7xl mx-auto">
+<button onclick="switchView('landing')" class="text-blue-400 text-sm mb-2">
+<i class="fa-solid fa-chevron-left"></i> กลับหน้าหลัก
+</button>
+<h1 class="text-3xl font-bold">ระบบจองรถขนส่ง</h1>
+</div>
+</div>
+
+<main class="max-w-7xl mx-auto px-4 py-8 grid lg:grid-cols-12 gap-8">
+
+<section class="lg:col-span-7 bg-slate-800 border border-slate-700 p-6 rounded-2xl">
+
+<h2 class="text-xl font-bold border-b border-slate-700 pb-4">
+<i class="fa-regular fa-calendar-check text-blue-400 mr-2"></i>
+ระบุเส้นทาง
+</h2>
 
-        <div class="max-w-7xl mx-auto">
+<form id="bookingForm" onsubmit="handleBooking(event)" class="space-y-6 mt-6">
 
-            <button onclick="switchView('landing')"
-                    class="text-blue-400 text-sm mb-2">
-                <i class="fa-solid fa-chevron-left"></i>
-                กลับหน้าหลัก
-            </button>
+<div class="flex gap-2 bg-slate-900 p-2 rounded-xl">
+<button type="button" id="btnPickupMode"
+onclick="setMapMode('pickup')"
+class="flex-1 bg-emerald-600 py-3 rounded-lg font-semibold">
+<i class="fa-solid fa-location-dot"></i> จุดรับสินค้า
+</button>
+
+<button type="button" id="btnDropoffMode"
+onclick="setMapMode('dropoff')"
+class="flex-1 bg-slate-800 py-3 rounded-lg">
+<i class="fa-solid fa-location-crosshairs"></i> จุดส่งสินค้า
+</button>
+</div>
+
+<div id="map"></div>
 
-            <h1 class="text-3xl font-bold">
-                ระบบจองรถขนส่ง
-            </h1>
+<p class="text-xs text-slate-400">
+<i class="fa-solid fa-circle-info text-blue-400"></i>
+คลิกบนแผนที่เพื่อปักหมุด
+</p>
 
-        </div>
-    </div>
+<div class="grid md:grid-cols-2 gap-4">
 
+<div>
+<label class="text-xs text-slate-300">จุดรับสินค้า</label>
+<input id="pickupInput" required placeholder="ปักหมุดบนแผนที่"
+class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
+</div>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 grid lg:grid-cols-12 gap-8">
+<div>
+<label class="text-xs text-slate-300">จุดส่งสินค้า</label>
+<input id="dropoffInput" required placeholder="ปักหมุดบนแผนที่"
+class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
+</div>
 
-        <section class="lg:col-span-7 bg-slate-800 border border-slate-700 p-6 rounded-2xl">
+</div>
 
-            <h2 class="text-xl font-bold border-b border-slate-700 pb-4">
-                <i class="fa-regular fa-calendar-check text-blue-400 mr-2"></i>
-                ระบุเส้นทาง
-            </h2>
+<input id="pickupLat" type="hidden">
+<input id="pickupLng" type="hidden">
+<input id="dropoffLat" type="hidden">
+<input id="dropoffLng" type="hidden">
 
-            <form id="bookingForm"
-                  onsubmit="handleBooking(event)"
-                  class="space-y-6 mt-6">
+<div class="grid md:grid-cols-2 gap-4">
 
-                <div class="flex gap-2 bg-slate-900 p-2 rounded-xl">
+<div>
+<label class="text-xs text-slate-300">วันที่ใช้งาน</label>
+<input id="bookingDate" type="date" required
+class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
+</div>
 
-                    <button type="button"
-                            id="btnPickupMode"
-                            onclick="setMapMode('pickup')"
-                            class="flex-1 bg-emerald-600 py-3 rounded-lg font-semibold">
-                        <i class="fa-solid fa-location-dot"></i>
-                        จุดรับสินค้า
-                    </button>
+<div>
+<label class="text-xs text-slate-300">ประเภทรถ</label>
+<select id="vehicleType" onchange="calculatePrice()"
+class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
 
-                    <button type="button"
-                            id="btnDropoffMode"
-                            onclick="setMapMode('dropoff')"
-                            class="flex-1 bg-slate-800 py-3 rounded-lg">
-                        <i class="fa-solid fa-location-crosshairs"></i>
-                        จุดส่งสินค้า
-                    </button>
+<option value="1500" data-base="1500" data-per-km="15">รถกระบะตู้ทึบ</option>
+<option value="2500" data-base="2500" data-per-km="20">รถกระบะคอก</option>
+<option value="4500" data-base="4500" data-per-km="35">รถ 6 ล้อตู้ใหญ่</option>
+<option value="8500" data-base="8500" data-per-km="55">รถ 10 ล้อ</option>
 
-                </div>
+</select>
+</div>
 
+</div>
 
-                <div id="map"></div>
+<div class="grid md:grid-cols-2 gap-4 border-t border-slate-700 pt-5">
 
-                <p class="text-xs text-slate-400">
-                    <i class="fa-solid fa-circle-info text-blue-400"></i>
-                    คลิกบนแผนที่เพื่อปักหมุด
-                </p>
+<div>
+<label class="text-xs text-slate-300">ชื่อผู้ติดต่อ</label>
+<input id="customerName" required placeholder="เช่น คุณสมชาย"
+class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
+</div>
 
+<div>
+<label class="text-xs text-slate-300">เบอร์โทรศัพท์</label>
+<input id="customerPhone" type="tel" required placeholder="08X-XXX-XXXX"
+class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
+</div>
 
-                <div class="grid md:grid-cols-2 gap-4">
+</div>
 
-                    <div>
-                        <label class="text-xs text-slate-300">
-                            จุดรับสินค้า
-                        </label>
+<button type="submit"
+class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 py-4 rounded-xl font-bold text-lg">
+ยืนยันการจอง <i class="fa-solid fa-arrow-right ml-2"></i>
+</button>
 
-                        <input id="pickupInput"
-                               required
-                               placeholder="ปักหมุดบนแผนที่"
-                               class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
-                    </div>
+</form>
+</section>
 
-                    <div>
-                        <label class="text-xs text-slate-300">
-                            จุดส่งสินค้า
-                        </label>
 
-                        <input id="dropoffInput"
-                               required
-                               placeholder="ปักหมุดบนแผนที่"
-                               class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
-                    </div>
+<aside class="lg:col-span-5">
+<div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
 
-                </div>
+<h3 class="font-bold text-xl border-b border-slate-700 pb-4">สรุปราคา</h3>
 
-                <input id="pickupLat" type="hidden">
-                <input id="pickupLng" type="hidden">
-                <input id="dropoffLat" type="hidden">
-                <input id="dropoffLng" type="hidden">
+<div class="space-y-4 mt-5 text-sm">
 
+<div class="flex justify-between">
+<span>ค่าบริการเริ่มต้น</span>
+<span id="basePrice">1,500 บาท</span>
+</div>
 
-                <div class="grid md:grid-cols-2 gap-4">
+<div class="flex justify-between">
+<span>ระยะทาง</span>
+<span id="distanceDisplay" class="text-blue-400">0 กม.</span>
+</div>
 
-                    <div>
-                        <label class="text-xs text-slate-300">
-                            วันที่ใช้งาน
-                        </label>
+<div class="flex justify-between">
+<span>ค่าระยะทาง</span>
+<span id="distanceCostDisplay">0 บาท</span>
+</div>
 
-                        <input id="bookingDate"
-                               type="date"
-                               required
-                               class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
-                    </div>
+<div class="border-t border-slate-700"></div>
 
-                    <div>
-                        <label class="text-xs text-slate-300">
-                            ประเภทรถ
-                        </label>
+<div class="flex justify-between items-center">
+<span class="font-bold">ราคาสุทธิประมาณ</span>
+<span id="totalPrice" class="text-2xl font-black text-blue-400">1,500 บาท</span>
+</div>
 
-                        <select id="vehicleType"
-                                onchange="calculatePrice()"
-                                class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
+</div>
 
-                            <option value="1500" data-base="1500" data-per-km="15">
-                                รถกระบะตู้ทึบ
-                            </option>
+<div class="mt-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-sm text-emerald-400">
+<i class="fa-solid fa-shield-halved mr-2"></i>
+ประกันสินค้าสูงสุด 100,000 บาท
+</div>
 
-                            <option value="2500" data-base="2500" data-per-km="20">
-                                รถกระบะคอก
-                            </option>
+</div>
+</aside>
 
-                            <option value="4500" data-base="4500" data-per-km="35">
-                                รถ 6 ล้อตู้ใหญ่
-                            </option>
+</main>
+</div>
 
-                            <option value="8500" data-base="8500" data-per-km="55">
-                                รถ 10 ล้อ
-                            </option>
 
-                        </select>
-                    </div>
+<!-- =========================================================
+ TRACKING
+========================================================= -->
 
-                </div>
+<div id="trackingView" class="hidden">
 
+<div class="bg-slate-900 border-b border-slate-800 py-7">
+<div class="max-w-7xl mx-auto px-4">
 
-                <div class="grid md:grid-cols-2 gap-4 border-t border-slate-700 pt-5">
+<button onclick="switchView('landing')" class="text-blue-400 text-sm">
+<i class="fa-solid fa-chevron-left"></i> กลับหน้าหลัก
+</button>
 
-                    <div>
-                        <label class="text-xs text-slate-300">
-                            ชื่อผู้ติดต่อ
-                        </label>
+<h1 class="text-3xl font-bold mt-2">ติดตามสถานะการขนส่ง</h1>
 
-                        <input id="customerName"
-                               required
-                               placeholder="เช่น คุณสมชาย"
-                               class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
-                    </div>
+</div>
+</div>
 
-                    <div>
-                        <label class="text-xs text-slate-300">
-                            เบอร์โทรศัพท์
-                        </label>
+<main class="max-w-7xl mx-auto px-4 py-8">
 
-                        <input id="customerPhone"
-                               type="tel"
-                               required
-                               placeholder="08X-XXX-XXXX"
-                               class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3">
-                    </div>
+<div class="max-w-2xl mx-auto bg-slate-800 border border-slate-700 p-5 rounded-2xl">
 
-                </div>
+<label class="text-sm font-semibold">เลขที่งานขนส่ง</label>
 
+<div class="flex gap-2 mt-3">
 
-                <button type="submit"
-                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 py-4 rounded-xl font-bold text-lg">
-                    ยืนยันการจอง
-                    <i class="fa-solid fa-arrow-right ml-2"></i>
-                </button>
+<input id="trackingInput"
+placeholder="เช่น MVX-20260902-001"
+class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3">
 
-            </form>
+<button onclick="searchTracking()"
+class="bg-blue-600 hover:bg-blue-500 px-5 rounded-xl font-bold">
+ค้นหา
+</button>
 
-        </section>
+</div>
 
-
-        <!-- PRICE -->
-
-        <aside class="lg:col-span-5">
-
-            <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
-
-                <h3 class="font-bold text-xl border-b border-slate-700 pb-4">
-                    สรุปราคา
-                </h3>
-
-                <div class="space-y-4 mt-5 text-sm">
-
-                    <div class="flex justify-between">
-                        <span>ค่าบริการเริ่มต้น</span>
-                        <span id="basePrice">1,500 บาท</span>
-                    </div>
-
-                    <div class="flex justify-between">
-                        <span>ระยะทาง</span>
-                        <span id="distanceDisplay" class="text-blue-400">
-                            0 กม.
-                        </span>
-                    </div>
-
-                    <div class="flex justify-between">
-                        <span>ค่าระยะทาง</span>
-                        <span id="distanceCostDisplay">
-                            0 บาท
-                        </span>
-                    </div>
-
-                    <div class="border-t border-slate-700"></div>
-
-                    <div class="flex justify-between items-center">
-
-                        <span class="font-bold">
-                            ราคาสุทธิประมาณ
-                        </span>
-
-                        <span id="totalPrice"
-                              class="text-2xl font-black text-blue-400">
-                            1,500 บาท
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <div class="mt-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-sm text-emerald-400">
-                    <i class="fa-solid fa-shield-halved mr-2"></i>
-                    ประกันสินค้าสูงสุด 100,000 บาท
-                </div>
-
-            </div>
-
-        </aside>
-
-    </main>
+<p id="trackingHint" class="text-xs text-slate-400 mt-3"></p>
 
 </div>
 
 
-<!-- ========================================================= -->
-<!-- TRACKING -->
-<!-- ========================================================= -->
+<div id="trackingResult" class="hidden mt-8">
+
+<div class="grid lg:grid-cols-12 gap-7">
+
+<section class="lg:col-span-7 bg-slate-800 border border-slate-700 p-6 rounded-2xl">
+
+<div class="flex justify-between items-start">
+
+<div>
+<p class="text-xs text-slate-400">เลขที่งาน</p>
+<h2 id="trackingJobId" class="text-2xl font-black text-blue-400"></h2>
+</div>
+
+<span id="statusBadge"
+class="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm">
+</span>
+
+</div>
+
+<div class="mt-7">
+
+<div class="flex justify-between text-xs text-slate-400">
+<span>ความคืบหน้า</span>
+<span id="progressText">0%</span>
+</div>
+
+<div class="h-3 bg-slate-900 rounded-full mt-2 overflow-hidden">
+<div id="progressBar"
+class="h-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-700"
+style="width:0%">
+</div>
+</div>
+
+</div>
+
 
-<div id="trackingView" class="hidden">
+<div class="mt-9 space-y-7">
 
-    <div class="bg-slate-900 border-b border-slate-800 py-7">
+<div class="status-line flex gap-4">
+<div id="dot1" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+<i class="fa-solid fa-check text-xs"></i>
+</div>
+<div>
+<h4 class="font-bold">รับคำสั่งจอง</h4>
+<p id="time1" class="text-xs text-slate-400 mt-1">รอข้อมูล</p>
+</div>
+</div>
 
-        <div class="max-w-7xl mx-auto px-4">
+<div class="status-line flex gap-4">
+<div id="dot2" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+<i class="fa-solid fa-truck text-xs"></i>
+</div>
+<div>
+<h4 class="font-bold">คนขับกำลังไปรับสินค้า</h4>
+<p id="time2" class="text-xs text-slate-400 mt-1">รอดำเนินการ</p>
+</div>
+</div>
 
-            <button onclick="switchView('landing')"
-                    class="text-blue-400 text-sm">
-                <i class="fa-solid fa-chevron-left"></i>
-                กลับหน้าหลัก
-            </button>
+<div class="status-line flex gap-4">
+<div id="dot3" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+<i class="fa-solid fa-box text-xs"></i>
+</div>
+<div>
+<h4 class="font-bold">รับสินค้าแล้ว</h4>
+<p id="time3" class="text-xs text-slate-400 mt-1">รอดำเนินการ</p>
+</div>
+</div>
 
-            <h1 class="text-3xl font-bold mt-2">
-                ติดตามสถานะการขนส่ง
-            </h1>
+<div class="status-line flex gap-4">
+<div id="dot4" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+<i class="fa-solid fa-route text-xs"></i>
+</div>
+<div>
+<h4 class="font-bold">กำลังจัดส่ง</h4>
+<p id="time4" class="text-xs text-slate-400 mt-1">รอดำเนินการ</p>
+</div>
+</div>
 
-        </div>
-    </div>
+<div class="status-line flex gap-4">
+<div id="dot5" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+<i class="fa-solid fa-flag-checkered text-xs"></i>
+</div>
+<div>
+<h4 class="font-bold">จัดส่งสำเร็จ</h4>
+<p id="time5" class="text-xs text-slate-400 mt-1">รอดำเนินการ</p>
+</div>
+</div>
 
+</div>
+</section>
 
-    <main class="max-w-7xl mx-auto px-4 py-8">
 
-        <!-- SEARCH -->
+<aside class="lg:col-span-5 space-y-6">
 
-        <div class="max-w-2xl mx-auto bg-slate-800 border border-slate-700 p-5 rounded-2xl">
+<div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
 
-            <label class="text-sm font-semibold">
-                เลขที่งานขนส่ง
-            </label>
+<h3 class="font-bold text-xl border-b border-slate-700 pb-4">
+ข้อมูลคนขับ
+</h3>
 
-            <div class="flex gap-2 mt-3">
+<div class="flex items-center gap-4 mt-5">
 
-                <input id="trackingInput"
-                       placeholder="เช่น MVX-20260902-001"
-                       class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3">
+<div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-2xl">
+<i class="fa-solid fa-user"></i>
+</div>
 
-                <button onclick="searchTracking()"
-                        class="bg-blue-600 hover:bg-blue-500 px-5 rounded-xl font-bold">
-                    ค้นหา
-                </button>
+<div>
+<h4 id="driverName" class="font-bold text-lg">-</h4>
+<p id="driverRating" class="text-yellow-400 text-sm">⭐ 4.9/5</p>
+</div>
 
-            </div>
+</div>
 
-            <p id="trackingHint" class="text-xs text-slate-400 mt-3"></p>
+<div class="grid grid-cols-2 gap-3 mt-6">
 
-        </div>
+<div class="bg-slate-900 p-4 rounded-xl">
+<p class="text-xs text-slate-400">รถ</p>
+<p id="driverVehicle" class="font-semibold mt-1">-</p>
+</div>
 
+<div class="bg-slate-900 p-4 rounded-xl">
+<p class="text-xs text-slate-400">ทะเบียน</p>
+<p id="driverPlate" class="font-semibold mt-1">-</p>
+</div>
 
-        <!-- TRACKING RESULT -->
+</div>
 
-        <div id="trackingResult" class="hidden mt-8">
+<div class="mt-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl text-sm">
+<i class="fa-solid fa-shield-halved mr-2"></i>
+คนขับผ่านการตรวจสอบแล้ว
+</div>
 
-            <div class="grid lg:grid-cols-12 gap-7">
+</div>
 
-                <!-- STATUS -->
 
-                <section class="lg:col-span-7 bg-slate-800 border border-slate-700 p-6 rounded-2xl">
+<div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
 
-                    <div class="flex justify-between items-start">
+<div class="flex justify-between">
 
-                        <div>
-                            <p class="text-xs text-slate-400">
-                                เลขที่งาน
-                            </p>
+<div>
+<p class="text-xs text-slate-400">เวลาถึงโดยประมาณ</p>
+<p id="eta" class="text-3xl font-black text-blue-400 mt-1">-</p>
+</div>
 
-                            <h2 id="trackingJobId"
-                                class="text-2xl font-black text-blue-400">
-                            </h2>
-                        </div>
+<div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+<i class="fa-solid fa-clock text-xl"></i>
+</div>
 
-                        <span id="statusBadge"
-                              class="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm">
-                        </span>
+</div>
+</div>
 
-                    </div>
+</aside>
 
+</div>
 
-                    <!-- PROGRESS -->
 
-                    <div class="mt-7">
+<section class="mt-7 bg-slate-800 border border-slate-700 p-5 rounded-2xl">
 
-                        <div class="flex justify-between text-xs text-slate-400">
-                            <span>ความคืบหน้า</span>
-                            <span id="progressText">0%</span>
-                        </div>
+<div class="flex justify-between items-center mb-4">
 
-                        <div class="h-3 bg-slate-900 rounded-full mt-2 overflow-hidden">
+<h3 class="font-bold text-xl">
+<i class="fa-solid fa-map-location-dot text-blue-400 mr-2"></i>
+ตำแหน่งการขนส่ง
+</h3>
 
-                            <div id="progressBar"
-                                 class="h-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-700"
-                                 style="width:0%">
-                            </div>
+<span class="text-xs text-emerald-400">
+<span class="pulse-dot inline-block w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
+Live Tracking
+</span>
 
-                        </div>
+</div>
 
-                    </div>
+<div id="trackingMap"></div>
+</section>
 
 
-                    <!-- TIMELINE -->
+<section id="reviewSection"
+class="hidden mt-7 bg-slate-800 border border-slate-700 p-7 rounded-2xl max-w-3xl mx-auto">
 
-                    <div class="mt-9 space-y-7">
+<div class="text-center">
 
-                        <div class="status-line flex gap-4">
+<div class="w-16 h-16 mx-auto rounded-full bg-yellow-500/10 text-yellow-400 flex items-center justify-center text-3xl">
+<i class="fa-solid fa-star"></i>
+</div>
 
-                            <div id="dot1"
-                                 class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-check text-xs"></i>
-                            </div>
+<h2 class="text-2xl font-bold mt-4">งานขนส่งเสร็จเรียบร้อย 🎉</h2>
+<p class="text-slate-400 text-sm mt-2">ช่วยให้คะแนนและรีวิวบริการของเรา</p>
 
-                            <div>
-                                <h4 class="font-bold">
-                                    รับคำสั่งจอง
-                                </h4>
+</div>
 
-                                <p id="time1" class="text-xs text-slate-400 mt-1">
-                                    รอข้อมูล
-                                </p>
-                            </div>
+<div class="flex justify-center gap-3 mt-7">
 
-                        </div>
+<i class="fa-solid fa-star star text-4xl text-slate-600" onclick="setRating(1)"></i>
+<i class="fa-solid fa-star star text-4xl text-slate-600" onclick="setRating(2)"></i>
+<i class="fa-solid fa-star star text-4xl text-slate-600" onclick="setRating(3)"></i>
+<i class="fa-solid fa-star star text-4xl text-slate-600" onclick="setRating(4)"></i>
+<i class="fa-solid fa-star star text-4xl text-slate-600" onclick="setRating(5)"></i>
 
+</div>
 
-                        <div class="status-line flex gap-4">
+<p id="ratingText" class="text-center text-yellow-400 text-sm mt-3">
+กรุณาเลือกคะแนน
+</p>
 
-                            <div id="dot2"
-                                 class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-truck text-xs"></i>
-                            </div>
+<textarea id="reviewComment" rows="4"
+placeholder="เขียนความคิดเห็นเกี่ยวกับบริการ..."
+class="mt-6 w-full bg-slate-900 border border-slate-700 rounded-xl p-4"></textarea>
 
-                            <div>
-                                <h4 class="font-bold">
-                                    คนขับกำลังไปรับสินค้า
-                                </h4>
+<button onclick="submitReview()"
+class="w-full mt-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-slate-950 py-4 rounded-xl font-bold">
+<i class="fa-solid fa-paper-plane mr-2"></i>
+ส่งรีวิว
+</button>
 
-                                <p id="time2" class="text-xs text-slate-400 mt-1">
-                                    รอดำเนินการ
-                                </p>
-                            </div>
+</section>
 
-                        </div>
+</div>
+</main>
+</div>
 
 
-                        <div class="status-line flex gap-4">
+<!-- =========================================================
+ ADMIN LOGIN
+========================================================= -->
 
-                            <div id="dot3"
-                                 class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-box text-xs"></i>
-                            </div>
+<div id="adminLoginView" class="hidden">
 
-                            <div>
-                                <h4 class="font-bold">
-                                    รับสินค้าแล้ว
-                                </h4>
+<div class="min-h-[calc(100vh-73px)] flex items-center justify-center px-4">
 
-                                <p id="time3" class="text-xs text-slate-400 mt-1">
-                                    รอดำเนินการ
-                                </p>
-                            </div>
+<div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl">
 
-                        </div>
+<div class="text-center">
 
+<div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center">
+<i class="fa-solid fa-user-shield text-2xl"></i>
+</div>
 
-                        <div class="status-line flex gap-4">
+<h1 class="text-2xl font-black mt-5">เข้าสู่ระบบ Admin</h1>
+<p class="text-slate-400 text-sm mt-2">
+จัดการงานขนส่ง MOVEEX
+</p>
 
-                            <div id="dot4"
-                                 class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-route text-xs"></i>
-                            </div>
+</div>
 
-                            <div>
-                                <h4 class="font-bold">
-                                    กำลังจัดส่ง
-                                </h4>
+<form onsubmit="adminLogin(event)" class="mt-7 space-y-4">
 
-                                <p id="time4" class="text-xs text-slate-400 mt-1">
-                                    รอดำเนินการ
-                                </p>
-                            </div>
+<div>
+<label class="text-sm">Username</label>
+<input id="adminUsername"
+required
+class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3"
+placeholder="admin">
+</div>
 
-                        </div>
+<div>
+<label class="text-sm">Password</label>
+<input id="adminPassword"
+type="password"
+required
+class="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl p-3"
+placeholder="••••••••">
+</div>
 
+<button class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold">
+<i class="fa-solid fa-right-to-bracket mr-2"></i>
+เข้าสู่ระบบ
+</button>
 
-                        <div class="status-line flex gap-4">
+</form>
 
-                            <div id="dot5"
-                                 class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-flag-checkered text-xs"></i>
-                            </div>
+<div class="mt-5 p-4 bg-slate-900 rounded-xl text-xs text-slate-400">
+Demo Account:<br>
+Username: <b class="text-blue-400">admin</b><br>
+Password: <b class="text-blue-400">moveex123</b>
+</div>
 
-                            <div>
-                                <h4 class="font-bold">
-                                    จัดส่งสำเร็จ
-                                </h4>
+<button onclick="switchView('landing')"
+class="w-full mt-4 text-slate-400 hover:text-white text-sm">
+กลับหน้าหลัก
+</button>
 
-                                <p id="time5" class="text-xs text-slate-400 mt-1">
-                                    รอดำเนินการ
-                                </p>
-                            </div>
+</div>
+</div>
+</div>
 
-                        </div>
 
-                    </div>
+<!-- =========================================================
+ ADMIN PANEL
+========================================================= -->
 
-                </section>
+<div id="adminView" class="hidden">
 
+<div class="bg-slate-950 min-h-screen">
 
-                <!-- DRIVER -->
+<div class="border-b border-slate-800 bg-slate-900">
 
-                <aside class="lg:col-span-5 space-y-6">
+<div class="max-w-[1500px] mx-auto px-4 py-4 flex justify-between items-center">
 
-                    <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+<i class="fa-solid fa-gauge-high"></i>
+</div>
 
-                        <h3 class="font-bold text-xl border-b border-slate-700 pb-4">
-                            ข้อมูลคนขับ
-                        </h3>
+<div>
+<h1 class="font-black text-xl">MOVEEX ADMIN</h1>
+<p class="text-xs text-slate-400">ระบบจัดการขนส่ง</p>
+</div>
+</div>
 
-                        <div class="flex items-center gap-4 mt-5">
+<div class="flex items-center gap-3">
 
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-2xl">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
+<span class="hidden sm:block text-sm text-slate-400">
+<i class="fa-solid fa-user-shield text-amber-400 mr-1"></i>
+Administrator
+</span>
 
-                            <div>
-                                <h4 id="driverName" class="font-bold text-lg">
-                                    -
-                                </h4>
+<button onclick="adminLogout()"
+class="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 rounded-xl text-sm">
+<i class="fa-solid fa-right-from-bracket mr-1"></i>
+ออกจากระบบ
+</button>
 
-                                <p id="driverRating" class="text-yellow-400 text-sm">
-                                    ⭐ 4.9/5
-                                </p>
-                            </div>
+</div>
 
-                        </div>
+</div>
+</div>
 
-                        <div class="grid grid-cols-2 gap-3 mt-6">
 
-                            <div class="bg-slate-900 p-4 rounded-xl">
-                                <p class="text-xs text-slate-400">
-                                    รถ
-                                </p>
+<div class="max-w-[1500px] mx-auto px-4 py-7">
 
-                                <p id="driverVehicle"
-                                   class="font-semibold mt-1">
-                                    -
-                                </p>
-                            </div>
+<!-- ADMIN NAV -->
 
-                            <div class="bg-slate-900 p-4 rounded-xl">
-                                <p class="text-xs text-slate-400">
-                                    ทะเบียน
-                                </p>
+<div class="flex flex-wrap gap-2 mb-7">
 
-                                <p id="driverPlate"
-                                   class="font-semibold mt-1">
-                                    -
-                                </p>
-                            </div>
+<button onclick="showAdminTab('dashboard')"
+id="adminTabDashboard"
+class="admin-tab bg-blue-600 px-4 py-2.5 rounded-xl text-sm font-semibold">
+<i class="fa-solid fa-chart-pie mr-1"></i>
+Dashboard
+</button>
 
-                        </div>
+<button onclick="showAdminTab('jobs')"
+id="adminTabJobs"
+class="admin-tab bg-slate-800 px-4 py-2.5 rounded-xl text-sm font-semibold">
+<i class="fa-solid fa-truck mr-1"></i>
+งานขนส่ง
+</button>
 
-                        <div class="mt-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl text-sm">
-                            <i class="fa-solid fa-shield-halved mr-2"></i>
-                            คนขับผ่านการตรวจสอบแล้ว
-                        </div>
+<button onclick="showAdminTab('reviews')"
+id="adminTabReviews"
+class="admin-tab bg-slate-800 px-4 py-2.5 rounded-xl text-sm font-semibold">
+<i class="fa-solid fa-star mr-1"></i>
+รีวิว
+</button>
 
-                    </div>
+<button onclick="showAdminTab('drivers')"
+id="adminTabDrivers"
+class="admin-tab bg-slate-800 px-4 py-2.5 rounded-xl text-sm font-semibold">
+<i class="fa-solid fa-id-card mr-1"></i>
+คนขับ
+</button>
 
+<button onclick="switchView('landing')"
+class="bg-slate-800 px-4 py-2.5 rounded-xl text-sm">
+<i class="fa-solid fa-globe mr-1"></i>
+หน้าเว็บไซต์
+</button>
 
-                    <!-- ETA -->
+</div>
 
-                    <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl">
 
-                        <div class="flex justify-between">
+<!-- DASHBOARD -->
 
-                            <div>
-                                <p class="text-xs text-slate-400">
-                                    เวลาถึงโดยประมาณ
-                                </p>
+<div id="adminDashboardTab">
 
-                                <p id="eta"
-                                   class="text-3xl font-black text-blue-400 mt-1">
-                                    -
-                                </p>
-                            </div>
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
-                            <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                                <i class="fa-solid fa-clock text-xl"></i>
-                            </div>
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+<div class="flex justify-between">
+<div>
+<p class="text-sm text-slate-400">งานทั้งหมด</p>
+<p id="statTotal" class="text-3xl font-black mt-2">0</p>
+</div>
+<div class="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center">
+<i class="fa-solid fa-truck"></i>
+</div>
+</div>
+</div>
 
-                        </div>
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+<div class="flex justify-between">
+<div>
+<p class="text-sm text-slate-400">กำลังดำเนินการ</p>
+<p id="statActive" class="text-3xl font-black mt-2">0</p>
+</div>
+<div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center">
+<i class="fa-solid fa-route"></i>
+</div>
+</div>
+</div>
 
-                    </div>
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+<div class="flex justify-between">
+<div>
+<p class="text-sm text-slate-400">สำเร็จแล้ว</p>
+<p id="statComplete" class="text-3xl font-black mt-2">0</p>
+</div>
+<div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center">
+<i class="fa-solid fa-circle-check"></i>
+</div>
+</div>
+</div>
 
-                </aside>
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+<div class="flex justify-between">
+<div>
+<p class="text-sm text-slate-400">รายได้รวม</p>
+<p id="statRevenue" class="text-2xl font-black mt-2 text-blue-400">฿0</p>
+</div>
+<div class="w-12 h-12 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center">
+<i class="fa-solid fa-baht-sign"></i>
+</div>
+</div>
+</div>
 
-            </div>
+</div>
 
 
-            <!-- MAP -->
+<div class="grid lg:grid-cols-2 gap-6 mt-6">
 
-            <section class="mt-7 bg-slate-800 border border-slate-700 p-5 rounded-2xl">
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
 
-                <div class="flex justify-between items-center mb-4">
+<div class="flex justify-between items-center mb-5">
+<h2 class="font-bold text-lg">สถานะงาน</h2>
+<i class="fa-solid fa-chart-column text-blue-400"></i>
+</div>
 
-                    <h3 class="font-bold text-xl">
-                        <i class="fa-solid fa-map-location-dot text-blue-400 mr-2"></i>
-                        ตำแหน่งการขนส่ง
-                    </h3>
+<div class="space-y-4">
 
-                    <span class="text-xs text-emerald-400">
-                        <span class="pulse-dot inline-block w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
-                        Live Tracking
-                    </span>
+<div>
+<div class="flex justify-between text-sm">
+<span>รับคำสั่งจอง</span>
+<span id="count0">0</span>
+</div>
+<div class="h-2 bg-slate-800 rounded-full mt-2">
+<div id="bar0" class="h-full bg-blue-500 rounded-full" style="width:0%"></div>
+</div>
+</div>
 
-                </div>
+<div>
+<div class="flex justify-between text-sm">
+<span>กำลังไปรับสินค้า</span>
+<span id="count1">0</span>
+</div>
+<div class="h-2 bg-slate-800 rounded-full mt-2">
+<div id="bar1" class="h-full bg-indigo-500 rounded-full" style="width:0%"></div>
+</div>
+</div>
 
-                <div id="trackingMap"></div>
+<div>
+<div class="flex justify-between text-sm">
+<span>รับสินค้าแล้ว</span>
+<span id="count2">0</span>
+</div>
+<div class="h-2 bg-slate-800 rounded-full mt-2">
+<div id="bar2" class="h-full bg-purple-500 rounded-full" style="width:0%"></div>
+</div>
+</div>
 
-            </section>
+<div>
+<div class="flex justify-between text-sm">
+<span>กำลังจัดส่ง</span>
+<span id="count3">0</span>
+</div>
+<div class="h-2 bg-slate-800 rounded-full mt-2">
+<div id="bar3" class="h-full bg-amber-500 rounded-full" style="width:0%"></div>
+</div>
+</div>
 
+<div>
+<div class="flex justify-between text-sm">
+<span>จัดส่งสำเร็จ</span>
+<span id="count4">0</span>
+</div>
+<div class="h-2 bg-slate-800 rounded-full mt-2">
+<div id="bar4" class="h-full bg-emerald-500 rounded-full" style="width:0%"></div>
+</div>
+</div>
 
-            <!-- REVIEW -->
+</div>
+</div>
 
-            <section id="reviewSection"
-                     class="hidden mt-7 bg-slate-800 border border-slate-700 p-7 rounded-2xl max-w-3xl mx-auto">
 
-                <div class="text-center">
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
 
-                    <div class="w-16 h-16 mx-auto rounded-full bg-yellow-500/10 text-yellow-400 flex items-center justify-center text-3xl">
-                        <i class="fa-solid fa-star"></i>
-                    </div>
+<div class="flex justify-between items-center mb-5">
+<h2 class="font-bold text-lg">งานล่าสุด</h2>
+<button onclick="showAdminTab('jobs')" class="text-blue-400 text-sm">
+ดูทั้งหมด
+</button>
+</div>
 
-                    <h2 class="text-2xl font-bold mt-4">
-                        งานขนส่งเสร็จเรียบร้อย 🎉
-                    </h2>
+<div id="recentJobs" class="space-y-3"></div>
 
-                    <p class="text-slate-400 text-sm mt-2">
-                        ช่วยให้คะแนนและรีวิวบริการของเรา
-                    </p>
+</div>
 
-                </div>
+</div>
+</div>
 
 
-                <!-- STARS -->
+<!-- JOBS -->
 
-                <div class="flex justify-center gap-3 mt-7">
+<div id="adminJobsTab" class="hidden">
 
-                    <i class="fa-solid fa-star star text-4xl text-slate-600"
-                       onclick="setRating(1)"></i>
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
 
-                    <i class="fa-solid fa-star star text-4xl text-slate-600"
-                       onclick="setRating(2)"></i>
+<div class="flex flex-col lg:flex-row gap-3 justify-between mb-6">
 
-                    <i class="fa-solid fa-star star text-4xl text-slate-600"
-                       onclick="setRating(3)"></i>
+<div>
+<h2 class="text-xl font-bold">รายการงานขนส่ง</h2>
+<p class="text-xs text-slate-400 mt-1">
+จัดการงานจองจากลูกค้า
+</p>
+</div>
 
-                    <i class="fa-solid fa-star star text-4xl text-slate-600"
-                       onclick="setRating(4)"></i>
+<div class="flex flex-wrap gap-2">
 
-                    <i class="fa-solid fa-star star text-4xl text-slate-600"
-                       onclick="setRating(5)"></i>
+<input id="adminSearch"
+oninput="renderAdminJobs()"
+placeholder="ค้นหาเลขงาน / ลูกค้า / โทรศัพท์"
+class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm w-64">
 
-                </div>
+<select id="adminStatusFilter"
+onchange="renderAdminJobs()"
+class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm">
 
-                <p id="ratingText"
-                   class="text-center text-yellow-400 text-sm mt-3">
-                    กรุณาเลือกคะแนน
-                </p>
+<option value="all">ทุกสถานะ</option>
+<option value="0">รับคำสั่งจอง</option>
+<option value="1">กำลังไปรับสินค้า</option>
+<option value="2">รับสินค้าแล้ว</option>
+<option value="3">กำลังจัดส่ง</option>
+<option value="4">จัดส่งสำเร็จ</option>
 
+</select>
 
-                <textarea id="reviewComment"
-                          rows="4"
-                          placeholder="เขียนความคิดเห็นเกี่ยวกับบริการ..."
-                          class="mt-6 w-full bg-slate-900 border border-slate-700 rounded-xl p-4 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+</div>
+</div>
 
 
-                <button onclick="submitReview()"
-                        class="w-full mt-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-slate-950 py-4 rounded-xl font-bold">
-                    <i class="fa-solid fa-paper-plane mr-2"></i>
-                    ส่งรีวิว
-                </button>
+<div class="overflow-x-auto">
 
-            </section>
+<table class="w-full text-sm">
 
-        </div>
+<thead>
+<tr class="text-left text-slate-400 border-b border-slate-800">
+<th class="pb-4 pr-4">เลขงาน</th>
+<th class="pb-4 pr-4">ลูกค้า</th>
+<th class="pb-4 pr-4">รถ</th>
+<th class="pb-4 pr-4">ราคา</th>
+<th class="pb-4 pr-4">สถานะ</th>
+<th class="pb-4">จัดการ</th>
+</tr>
+</thead>
 
-    </main>
+<tbody id="adminJobsTable"></tbody>
 
+</table>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- REVIEWS -->
+
+<div id="adminReviewsTab" class="hidden">
+
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+
+<h2 class="text-xl font-bold">รีวิวจากลูกค้า</h2>
+<p class="text-sm text-slate-400 mt-1">ความคิดเห็นและคะแนนบริการ</p>
+
+<div id="adminReviewsList" class="grid md:grid-cols-2 gap-4 mt-6"></div>
+
+</div>
+
+</div>
+
+
+<!-- DRIVERS -->
+
+<div id="adminDriversTab" class="hidden">
+
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+
+<div class="flex justify-between items-center mb-6">
+
+<div>
+<h2 class="text-xl font-bold">ข้อมูลคนขับ</h2>
+<p class="text-sm text-slate-400">คนขับที่กำหนดให้กับงาน</p>
+</div>
+
+</div>
+
+<div id="adminDriversList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+
+<!-- =========================================================
+ JOB DETAIL MODAL
+========================================================= -->
+
+<div id="jobModal"
+class="hidden fixed inset-0 z-[200] modal-bg flex items-center justify-center p-4">
+
+<div class="w-full max-w-3xl max-h-[90vh] overflow-auto bg-slate-800 border border-slate-700 rounded-2xl">
+
+<div class="p-6 border-b border-slate-700 flex justify-between items-center">
+
+<h2 class="text-xl font-bold">รายละเอียดงาน</h2>
+
+<button onclick="closeJobModal()"
+class="w-9 h-9 rounded-lg bg-slate-700 hover:bg-slate-600">
+<i class="fa-solid fa-xmark"></i>
+</button>
+
+</div>
+
+<div id="jobModalContent" class="p-6"></div>
+
+</div>
 </div>
 
 
 <!-- TOAST -->
 
 <div id="toast"
-     class="hidden fixed top-24 right-5 z-[100] bg-slate-800 border border-slate-700 shadow-2xl rounded-xl px-5 py-4">
+class="hidden fixed top-24 right-5 z-[300] shadow-2xl rounded-xl px-5 py-4">
 </div>
 
 
-<!-- ========================================================= -->
-<!-- SCRIPTS -->
-<!-- ========================================================= -->
+<!-- =========================================================
+ SCRIPTS
+========================================================= -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
 
-let map = null;
-let trackingMap = null;
+let map=null;
+let trackingMap=null;
 
-let currentMode = "pickup";
+let currentMode="pickup";
 
-let pickupMarker = null;
-let dropoffMarker = null;
-let driverMarker = null;
-let routePolyline = null;
+let pickupMarker=null;
+let dropoffMarker=null;
+let driverMarker=null;
+let routePolyline=null;
 
-let calculatedDistance = 0;
+let calculatedDistance=0;
+let currentRating=0;
+let currentJob=null;
 
-let currentRating = 0;
+const STATUS_NAMES=[
+ "รับคำสั่งจอง",
+ "คนขับกำลังไปรับสินค้า",
+ "รับสินค้าแล้ว",
+ "กำลังจัดส่ง",
+ "จัดส่งสำเร็จ"
+];
 
-let currentJob = null;
+const STATUS_COLORS=[
+ "blue",
+ "indigo",
+ "purple",
+ "amber",
+ "emerald"
+];
 
 
 /* =========================================================
-   VIEW
+ DATA
 ========================================================= */
 
-function switchView(viewName) {
+function getJobs(){
 
-    const views = [
-        "landingView",
-        "bookingView",
-        "trackingView"
-    ];
+ const data=localStorage.getItem("moveex_jobs");
 
-    views.forEach(id => {
-        document.getElementById(id).classList.add("hidden");
-    });
+ if(!data) return [];
 
-    if (viewName === "landing") {
+ try{
+   return JSON.parse(data);
+ }catch(e){
+   return [];
+ }
+}
 
-        document.getElementById("landingView").classList.remove("hidden");
 
-    }
+function saveJobs(jobs){
 
-    if (viewName === "booking") {
+ localStorage.setItem(
+   "moveex_jobs",
+   JSON.stringify(jobs)
+ );
 
-        document.getElementById("bookingView").classList.remove("hidden");
+ updateHeroStats();
+}
 
-        setTimeout(() => {
 
-            if (!map) {
-                initMap();
-            } else {
-                map.invalidateSize();
-            }
+function getReviews(){
 
-        }, 200);
+ const data=localStorage.getItem("moveex_reviews");
 
-    }
+ if(!data) return [];
 
-    if (viewName === "tracking") {
+ try{
+   return JSON.parse(data);
+ }catch(e){
+   return [];
+ }
+}
 
-        document.getElementById("trackingView").classList.remove("hidden");
 
-        loadLastBooking();
+function saveReviews(reviews){
 
-        setTimeout(() => {
+ localStorage.setItem(
+   "moveex_reviews",
+   JSON.stringify(reviews)
+ );
 
-            if (trackingMap) {
-                trackingMap.invalidateSize();
-            }
-
-        }, 300);
-
-    }
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
 }
 
 
 /* =========================================================
-   TOAST
+ VIEW
 ========================================================= */
 
-function showToast(message, type = "success") {
+function switchView(viewName){
 
-    const toast = document.getElementById("toast");
+ const views=[
+   "landingView",
+   "bookingView",
+   "trackingView",
+   "adminLoginView",
+   "adminView"
+ ];
 
-    toast.className =
-        "fixed top-24 right-5 z-[100] shadow-2xl rounded-xl px-5 py-4 toast";
+ views.forEach(id=>{
+   document.getElementById(id).classList.add("hidden");
+ });
 
-    if (type === "success") {
+ if(viewName==="landing"){
+   document.getElementById("landingView").classList.remove("hidden");
+ }
 
-        toast.classList.add(
-            "bg-emerald-900",
-            "border",
-            "border-emerald-500",
-            "text-emerald-200"
-        );
+ if(viewName==="booking"){
 
-    } else {
+   document.getElementById("bookingView").classList.remove("hidden");
 
-        toast.classList.add(
-            "bg-red-900",
-            "border",
-            "border-red-500",
-            "text-red-200"
-        );
+   setTimeout(()=>{
 
-    }
+     if(!map){
+       initMap();
+     }else{
+       map.invalidateSize();
+     }
 
-    toast.innerHTML = message;
+   },200);
+ }
 
-    setTimeout(() => {
-        toast.classList.add("hidden");
-    }, 3500);
+ if(viewName==="tracking"){
+
+   document.getElementById("trackingView").classList.remove("hidden");
+
+   loadLastBooking();
+
+   setTimeout(()=>{
+
+     if(trackingMap){
+       trackingMap.invalidateSize();
+     }
+
+   },300);
+ }
+
+ if(viewName==="adminLogin"){
+   document.getElementById("adminLoginView").classList.remove("hidden");
+ }
+
+ if(viewName==="admin"){
+
+   if(localStorage.getItem("moveex_admin_logged")!=="true"){
+     switchView("adminLogin");
+     return;
+   }
+
+   document.getElementById("adminView").classList.remove("hidden");
+
+   refreshAdmin();
+ }
+
+ window.scrollTo({
+   top:0,
+   behavior:"smooth"
+ });
+
 }
 
 
 /* =========================================================
-   MAP
+ TOAST
 ========================================================= */
 
-function initMap() {
+function showToast(message,type="success"){
 
-    map = L.map("map").setView([13.7563, 100.5018], 11);
+ const toast=document.getElementById("toast");
 
-    L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-            attribution: "© OpenStreetMap contributors"
-        }
-    ).addTo(map);
+ toast.className=
+ "fixed top-24 right-5 z-[300] shadow-2xl rounded-xl px-5 py-4 toast";
 
+ if(type==="success"){
 
-    const geocoder = L.Control.geocoder({
-        defaultMarkGeocode: false,
-        placeholder: "ค้นหาสถานที่ / ที่อยู่..."
-    })
-    .on("markgeocode", function(e) {
+   toast.classList.add(
+     "bg-emerald-900",
+     "border",
+     "border-emerald-500",
+     "text-emerald-200"
+   );
 
-        const latlng = e.geocode.center;
+ }else{
 
-        map.flyTo(latlng, 15);
+   toast.classList.add(
+     "bg-red-900",
+     "border",
+     "border-red-500",
+     "text-red-200"
+   );
 
-        placePin(
-            latlng.lat,
-            latlng.lng,
-            currentMode
-        );
+ }
 
-    })
-    .addTo(map);
+ toast.innerHTML=message;
 
-
-    map.on("click", function(e) {
-
-        placePin(
-            e.latlng.lat,
-            e.latlng.lng,
-            currentMode
-        );
-
-    });
+ setTimeout(()=>{
+   toast.classList.add("hidden");
+ },3500);
 
 }
 
 
 /* =========================================================
-   PIN
+ MAP
 ========================================================= */
 
-function setMapMode(mode) {
+function initMap(){
 
-    currentMode = mode;
+ map=L.map("map").setView(
+   [13.7563,100.5018],
+   11
+ );
 
-    const pickup = document.getElementById("btnPickupMode");
-    const dropoff = document.getElementById("btnDropoffMode");
+ L.tileLayer(
+   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+   {
+     attribution:"© OpenStreetMap contributors"
+   }
+ ).addTo(map);
 
-    if (mode === "pickup") {
 
-        pickup.className =
-            "flex-1 bg-emerald-600 py-3 rounded-lg font-semibold";
+ const geocoder=L.Control.geocoder({
+   defaultMarkGeocode:false,
+   placeholder:"ค้นหาสถานที่ / ที่อยู่..."
+ })
+ .on("markgeocode",function(e){
 
-        dropoff.className =
-            "flex-1 bg-slate-800 py-3 rounded-lg";
+   const latlng=e.geocode.center;
 
-    } else {
+   map.flyTo(latlng,15);
 
-        dropoff.className =
-            "flex-1 bg-red-600 py-3 rounded-lg font-semibold";
+   placePin(
+     latlng.lat,
+     latlng.lng,
+     currentMode
+   );
 
-        pickup.className =
-            "flex-1 bg-slate-800 py-3 rounded-lg";
+ })
+ .addTo(map);
 
-    }
+
+ map.on("click",function(e){
+
+   placePin(
+     e.latlng.lat,
+     e.latlng.lng,
+     currentMode
+   );
+
+ });
+
 }
 
 
-function placePin(lat, lng, mode) {
+function setMapMode(mode){
 
-    if (mode === "pickup") {
+ currentMode=mode;
 
-        if (pickupMarker) {
-            map.removeLayer(pickupMarker);
-        }
+ const pickup=document.getElementById("btnPickupMode");
+ const dropoff=document.getElementById("btnDropoffMode");
 
-        pickupMarker = L.marker([lat, lng], {
-            draggable: true
-        }).addTo(map);
+ if(mode==="pickup"){
 
-        pickupMarker.bindPopup("จุดรับสินค้า").openPopup();
+   pickup.className=
+   "flex-1 bg-emerald-600 py-3 rounded-lg font-semibold";
 
-        document.getElementById("pickupLat").value = lat;
-        document.getElementById("pickupLng").value = lng;
+   dropoff.className=
+   "flex-1 bg-slate-800 py-3 rounded-lg";
 
-        fetchAddress(
-            lat,
-            lng,
-            "pickupInput"
-        );
+ }else{
 
-        pickupMarker.on("dragend", function(e) {
+   dropoff.className=
+   "flex-1 bg-red-600 py-3 rounded-lg font-semibold";
 
-            const pos = e.target.getLatLng();
+   pickup.className=
+   "flex-1 bg-slate-800 py-3 rounded-lg";
 
-            placePin(
-                pos.lat,
-                pos.lng,
-                "pickup"
-            );
+ }
 
-        });
+}
 
-    } else {
 
-        if (dropoffMarker) {
-            map.removeLayer(dropoffMarker);
-        }
+function placePin(lat,lng,mode){
 
-        dropoffMarker = L.marker([lat, lng], {
-            draggable: true
-        }).addTo(map);
+ if(mode==="pickup"){
 
-        dropoffMarker.bindPopup("จุดส่งสินค้า").openPopup();
+   if(pickupMarker)
+     map.removeLayer(pickupMarker);
 
-        document.getElementById("dropoffLat").value = lat;
-        document.getElementById("dropoffLng").value = lng;
+   pickupMarker=L.marker(
+     [lat,lng],
+     {draggable:true}
+   ).addTo(map);
 
-        fetchAddress(
-            lat,
-            lng,
-            "dropoffInput"
-        );
+   pickupMarker
+   .bindPopup("จุดรับสินค้า")
+   .openPopup();
 
-        dropoffMarker.on("dragend", function(e) {
+   document.getElementById("pickupLat").value=lat;
+   document.getElementById("pickupLng").value=lng;
 
-            const pos = e.target.getLatLng();
+   fetchAddress(lat,lng,"pickupInput");
 
-            placePin(
-                pos.lat,
-                pos.lng,
-                "dropoff"
-            );
+   pickupMarker.on("dragend",function(e){
 
-        });
+     const pos=e.target.getLatLng();
 
-    }
+     placePin(
+       pos.lat,
+       pos.lng,
+       "pickup"
+     );
 
-    updateRouteAndDistance();
+   });
+
+ }else{
+
+   if(dropoffMarker)
+     map.removeLayer(dropoffMarker);
+
+   dropoffMarker=L.marker(
+     [lat,lng],
+     {draggable:true}
+   ).addTo(map);
+
+   dropoffMarker
+   .bindPopup("จุดส่งสินค้า")
+   .openPopup();
+
+   document.getElementById("dropoffLat").value=lat;
+   document.getElementById("dropoffLng").value=lng;
+
+   fetchAddress(lat,lng,"dropoffInput");
+
+   dropoffMarker.on("dragend",function(e){
+
+     const pos=e.target.getLatLng();
+
+     placePin(
+       pos.lat,
+       pos.lng,
+       "dropoff"
+     );
+
+   });
+
+ }
+
+ updateRouteAndDistance();
+
+}
+
+
+function fetchAddress(lat,lng,inputId){
+
+ const input=document.getElementById(inputId);
+
+ input.value="กำลังค้นหาที่อยู่...";
+
+ fetch(
+   `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+   {
+     headers:{
+       "Accept-Language":"th"
+     }
+   }
+ )
+ .then(res=>res.json())
+ .then(data=>{
+
+   input.value=
+   data.display_name ||
+   `พิกัด ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+ })
+ .catch(()=>{
+
+   input.value=
+   `พิกัด ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+ });
+
 }
 
 
 /* =========================================================
-   ADDRESS
-========================================================= */
-
-function fetchAddress(lat, lng, inputId) {
-
-    const input = document.getElementById(inputId);
-
-    input.value = "กำลังค้นหาที่อยู่...";
-
-    fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
-        {
-            headers: {
-                "Accept-Language": "th"
-            }
-        }
-    )
-    .then(res => res.json())
-    .then(data => {
-
-        input.value =
-            data.display_name ||
-            `พิกัด ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-
-    })
-    .catch(() => {
-
-        input.value =
-            `พิกัด ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-
-    });
-}
-
-
-/* =========================================================
-   DISTANCE
+ DISTANCE / PRICE
 ========================================================= */
 
 function getHaversineDistance(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-) {
+ lat1,
+ lon1,
+ lat2,
+ lon2
+){
 
-    const R = 6371;
+ const R=6371;
 
-    const dLat =
-        (lat2 - lat1) * Math.PI / 180;
+ const dLat=
+   (lat2-lat1)*Math.PI/180;
 
-    const dLon =
-        (lon2 - lon1) * Math.PI / 180;
+ const dLon=
+   (lon2-lon1)*Math.PI/180;
 
-    const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) ** 2;
+ const a=
+   Math.sin(dLat/2)**2+
+   Math.cos(lat1*Math.PI/180)*
+   Math.cos(lat2*Math.PI/180)*
+   Math.sin(dLon/2)**2;
 
-    return R *
-        2 *
-        Math.atan2(
-            Math.sqrt(a),
-            Math.sqrt(1 - a)
-        );
+ return R*2*Math.atan2(
+   Math.sqrt(a),
+   Math.sqrt(1-a)
+ );
+
 }
 
 
-function updateRouteAndDistance() {
+function updateRouteAndDistance(){
 
-    if (!pickupMarker || !dropoffMarker) {
-        return;
-    }
+ if(!pickupMarker||!dropoffMarker)
+   return;
 
-    const pickup =
-        pickupMarker.getLatLng();
+ const pickup=pickupMarker.getLatLng();
+ const dropoff=dropoffMarker.getLatLng();
 
-    const dropoff =
-        dropoffMarker.getLatLng();
+ if(routePolyline)
+   map.removeLayer(routePolyline);
 
-    if (routePolyline) {
-        map.removeLayer(routePolyline);
-    }
+ routePolyline=
+ L.polyline(
+   [pickup,dropoff],
+   {
+     color:"#3b82f6",
+     weight:4,
+     dashArray:"8,8"
+   }
+ ).addTo(map);
 
-    routePolyline =
-        L.polyline(
-            [pickup, dropoff],
-            {
-                color: "#3b82f6",
-                weight: 4,
-                dashArray: "8,8"
-            }
-        ).addTo(map);
+ map.fitBounds(
+   L.latLngBounds([pickup,dropoff]),
+   {padding:[50,50]}
+ );
 
-    map.fitBounds(
-        L.latLngBounds(
-            [pickup, dropoff]
-        ),
-        {
-            padding: [50, 50]
-        }
-    );
+ calculatedDistance=
+ getHaversineDistance(
+   pickup.lat,
+   pickup.lng,
+   dropoff.lat,
+   dropoff.lng
+ );
 
-    calculatedDistance =
-        getHaversineDistance(
-            pickup.lat,
-            pickup.lng,
-            dropoff.lat,
-            dropoff.lng
-        );
+ calculatePrice();
 
-    calculatePrice();
 }
 
 
-/* =========================================================
-   PRICE
-========================================================= */
+function calculatePrice(){
 
-function calculatePrice() {
+ const select=
+ document.getElementById("vehicleType");
 
-    const select =
-        document.getElementById("vehicleType");
+ const option=
+ select.options[select.selectedIndex];
 
-    const option =
-        select.options[select.selectedIndex];
+ const base=
+ parseFloat(option.dataset.base);
 
-    const base =
-        parseFloat(
-            option.dataset.base
-        );
+ const perKm=
+ parseFloat(option.dataset.perKm);
 
-    const perKm =
-        parseFloat(
-            option.dataset.perKm
-        );
+ const distanceCost=
+ calculatedDistance*perKm;
 
-    const distanceCost =
-        calculatedDistance * perKm;
+ const total=
+ base+distanceCost;
 
-    const total =
-        base + distanceCost;
+ document.getElementById("basePrice")
+ .innerText=
+ base.toLocaleString()+" บาท";
 
-    document.getElementById("basePrice")
-        .innerText =
-        base.toLocaleString() + " บาท";
+ document.getElementById("distanceDisplay")
+ .innerText=
+ calculatedDistance.toFixed(1)+" กม.";
 
-    document.getElementById("distanceDisplay")
-        .innerText =
-        calculatedDistance.toFixed(1) + " กม.";
+ document.getElementById("distanceCostDisplay")
+ .innerText=
+ Math.round(distanceCost).toLocaleString()+" บาท";
 
-    document.getElementById("distanceCostDisplay")
-        .innerText =
-        Math.round(distanceCost).toLocaleString() + " บาท";
-
-    document.getElementById("totalPrice")
-        .innerText =
-        Math.round(total).toLocaleString() + " บาท";
-}
-
-
-/* =========================================================
-   BOOKING
-========================================================= */
-
-function generateJobId() {
-
-    const date =
-        new Date();
-
-    const dateString =
-        date.getFullYear() +
-        String(date.getMonth() + 1).padStart(2, "0") +
-        String(date.getDate()).padStart(2, "0");
-
-    const random =
-        Math.floor(
-            100 + Math.random() * 900
-        );
-
-    return `MVX-${dateString}-${random}`;
-}
-
-
-function handleBooking(event) {
-
-    event.preventDefault();
-
-    const pickupLat =
-        document.getElementById("pickupLat").value;
-
-    const dropoffLat =
-        document.getElementById("dropoffLat").value;
-
-    if (!pickupLat || !dropoffLat) {
-
-        showToast(
-            "กรุณาปักหมุดจุดรับและจุดส่งสินค้า",
-            "error"
-        );
-
-        return;
-    }
-
-
-    const jobId =
-        generateJobId();
-
-    const vehicle =
-        document.getElementById("vehicleType");
-
-    const vehicleName =
-        vehicle.options[
-            vehicle.selectedIndex
-        ].text;
-
-
-    currentJob = {
-
-        id: jobId,
-
-        status: 0,
-
-        pickup:
-            document.getElementById("pickupInput").value,
-
-        dropoff:
-            document.getElementById("dropoffInput").value,
-
-        pickupLat:
-            parseFloat(
-                document.getElementById("pickupLat").value
-            ),
-
-        pickupLng:
-            parseFloat(
-                document.getElementById("pickupLng").value
-            ),
-
-        dropoffLat:
-            parseFloat(
-                document.getElementById("dropoffLat").value
-            ),
-
-        dropoffLng:
-            parseFloat(
-                document.getElementById("dropoffLng").value
-            ),
-
-        customer:
-            document.getElementById("customerName").value,
-
-        phone:
-            document.getElementById("customerPhone").value,
-
-        vehicle:
-            vehicleName,
-
-        total:
-            document.getElementById("totalPrice").innerText,
-
-        driver: {
-            name: "คุณธนกร ใจดี",
-            rating: "⭐ 4.9/5",
-            vehicle: vehicleName,
-            plate: "กข 1234 กรุงเทพฯ"
-        },
-
-        createdAt:
-            new Date().toLocaleString("th-TH")
-
-    };
-
-
-    localStorage.setItem(
-        "moveex_current_job",
-        JSON.stringify(currentJob)
-    );
-
-
-    showToast(
-        `จองสำเร็จ! เลขงาน <b>${jobId}</b>`
-    );
-
-
-    setTimeout(() => {
-
-        document.getElementById("trackingInput").value =
-            jobId;
-
-        switchView("tracking");
-
-        searchTracking();
-
-    }, 1000);
-}
-
-
-/* =========================================================
-   LOAD BOOKING
-========================================================= */
-
-function loadLastBooking() {
-
-    const data =
-        localStorage.getItem(
-            "moveex_current_job"
-        );
-
-    if (!data) {
-
-        document.getElementById("trackingHint")
-            .innerText =
-            "ยังไม่มีงานล่าสุด กรุณาจองรถก่อน";
-
-        return;
-    }
-
-    currentJob =
-        JSON.parse(data);
-
-    document.getElementById("trackingInput")
-        .value =
-        currentJob.id;
-
-    document.getElementById("trackingHint")
-        .innerHTML =
-        `งานล่าสุด: <b class="text-blue-400">${currentJob.id}</b>`;
+ document.getElementById("totalPrice")
+ .innerText=
+ Math.round(total).toLocaleString()+" บาท";
 
 }
 
 
 /* =========================================================
-   TRACKING SEARCH
+ BOOKING
 ========================================================= */
 
-function searchTracking() {
+function generateJobId(){
 
-    const input =
-        document.getElementById("trackingInput");
+ const now=new Date();
 
-    const jobId =
-        input.value.trim();
+ const dateString=
+ now.getFullYear()+
+ String(now.getMonth()+1).padStart(2,"0")+
+ String(now.getDate()).padStart(2,"0");
 
-    if (!jobId) {
+ let random;
 
-        showToast(
-            "กรุณาระบุเลขที่งาน",
-            "error"
-        );
+ do{
 
-        return;
-    }
+   random=
+   Math.floor(
+     100+Math.random()*900
+   );
 
+ }while(
+   getJobs().some(
+     job=>job.id===`MVX-${dateString}-${random}`
+   )
+ );
 
-    const data =
-        localStorage.getItem(
-            "moveex_current_job"
-        );
+ return `MVX-${dateString}-${random}`;
 
-    if (!data) {
-
-        showToast(
-            "ไม่พบข้อมูลการขนส่ง",
-            "error"
-        );
-
-        return;
-    }
+}
 
 
-    const job =
-        JSON.parse(data);
+function getVehicleName(){
+
+ const vehicle=
+ document.getElementById("vehicleType");
+
+ return vehicle.options[
+   vehicle.selectedIndex
+ ].text;
+
+}
 
 
-    if (job.id !== jobId) {
+function handleBooking(event){
 
-        showToast(
-            "ไม่พบเลขที่งานนี้",
-            "error"
-        );
+ event.preventDefault();
 
-        return;
-    }
+ const pickupLat=
+ document.getElementById("pickupLat").value;
+
+ const pickupLng=
+ document.getElementById("pickupLng").value;
+
+ const dropoffLat=
+ document.getElementById("dropoffLat").value;
+
+ const dropoffLng=
+ document.getElementById("dropoffLng").value;
+
+ if(
+   !pickupLat||
+   !pickupLng||
+   !dropoffLat||
+   !dropoffLng
+ ){
+
+   showToast(
+     "กรุณาปักหมุดจุดรับและจุดส่งสินค้า",
+     "error"
+   );
+
+   return;
+ }
 
 
-    currentJob = job;
+ const jobId=generateJobId();
 
-    renderTracking();
+ const job={
+
+   id:jobId,
+
+   status:0,
+
+   pickup:
+     document.getElementById("pickupInput").value,
+
+   dropoff:
+     document.getElementById("dropoffInput").value,
+
+   pickupLat:parseFloat(pickupLat),
+   pickupLng:parseFloat(pickupLng),
+
+   dropoffLat:parseFloat(dropoffLat),
+   dropoffLng:parseFloat(dropoffLng),
+
+   bookingDate:
+     document.getElementById("bookingDate").value,
+
+   customer:
+     document.getElementById("customerName").value,
+
+   phone:
+     document.getElementById("customerPhone").value,
+
+   vehicle:getVehicleName(),
+
+   distance:
+     calculatedDistance,
+
+   total:
+     parseInt(
+       document.getElementById("totalPrice")
+       .innerText
+       .replace(/[^0-9]/g,"")
+     )||0,
+
+   driver:{
+     name:"คุณธนกร ใจดี",
+     rating:"⭐ 4.9/5",
+     vehicle:getVehicleName(),
+     plate:"กข 1234 กรุงเทพฯ"
+   },
+
+   createdAt:
+     new Date().toISOString(),
+
+   updatedAt:
+     new Date().toISOString()
+
+ };
+
+
+ const jobs=getJobs();
+
+ jobs.push(job);
+
+ saveJobs(jobs);
+
+ currentJob=job;
+
+ localStorage.setItem(
+   "moveex_current_job",
+   JSON.stringify(job)
+ );
+
+
+ showToast(
+   `จองสำเร็จ! เลขงาน <b>${jobId}</b>`
+ );
+
+
+ document.getElementById("bookingForm").reset();
+
+ calculatedDistance=0;
+
+ setTimeout(()=>{
+
+   document.getElementById("trackingInput").value=
+     jobId;
+
+   switchView("tracking");
+
+   searchTracking();
+
+ },1000);
 
 }
 
 
 /* =========================================================
-   RENDER TRACKING
+ TRACKING
 ========================================================= */
 
-function renderTracking() {
+function loadLastBooking(){
 
-    const job =
-        currentJob;
+ const data=
+ localStorage.getItem(
+   "moveex_current_job"
+ );
 
-    document.getElementById("trackingResult")
-        .classList.remove("hidden");
+ if(!data){
 
+   document.getElementById("trackingHint")
+   .innerText=
+   "ยังไม่มีงานล่าสุด กรุณาจองรถก่อน";
 
-    document.getElementById("trackingJobId")
-        .innerText =
-        job.id;
+   return;
 
+ }
 
-    const statuses = [
-        "รับคำสั่งจอง",
-        "คนขับกำลังไปรับสินค้า",
-        "รับสินค้าแล้ว",
-        "กำลังจัดส่ง",
-        "จัดส่งสำเร็จ"
-    ];
+ try{
 
+   currentJob=JSON.parse(data);
 
-    const currentStatus =
-        Math.min(
-            job.status || 0,
-            4
-        );
+   document.getElementById("trackingInput")
+   .value=currentJob.id;
 
+   document.getElementById("trackingHint")
+   .innerHTML=
+   `งานล่าสุด: <b class="text-blue-400">${currentJob.id}</b>`;
 
-    const progress =
-        [0, 25, 50, 75, 100][currentStatus];
+ }catch(e){}
 
-
-    document.getElementById("progressBar")
-        .style.width =
-        progress + "%";
-
-    document.getElementById("progressText")
-        .innerText =
-        progress + "%";
+}
 
 
-    document.getElementById("statusBadge")
-        .innerText =
-        statuses[currentStatus];
+function searchTracking(){
+
+ const jobId=
+ document.getElementById("trackingInput")
+ .value.trim();
+
+ if(!jobId){
+
+   showToast(
+     "กรุณาระบุเลขที่งาน",
+     "error"
+   );
+
+   return;
+ }
 
 
-    const dots =
-        [
-            "dot1",
-            "dot2",
-            "dot3",
-            "dot4",
-            "dot5"
-        ];
+ const jobs=getJobs();
 
-    dots.forEach((id, index) => {
-
-        const el =
-            document.getElementById(id);
-
-        if (index <= currentStatus) {
-
-            el.className =
-                "w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0";
-
-        } else {
-
-            el.className =
-                "w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0";
-
-        }
-
-    });
+ const job=
+ jobs.find(
+   item=>item.id.toUpperCase()===jobId.toUpperCase()
+ );
 
 
-    const now =
-        new Date().toLocaleTimeString(
-            "th-TH",
-            {
-                hour: "2-digit",
-                minute: "2-digit"
-            }
-        );
+ if(!job){
+
+   showToast(
+     "ไม่พบเลขที่งานนี้",
+     "error"
+   );
+
+   document.getElementById("trackingResult")
+   .classList.add("hidden");
+
+   return;
+ }
 
 
-    for (let i = 1; i <= 5; i++) {
+ currentJob=job;
 
-        document.getElementById("time" + i)
-            .innerText =
-            i <= currentStatus + 1
-                ? `อัปเดต ${now} น.`
-                : "รอดำเนินการ";
+ localStorage.setItem(
+   "moveex_current_job",
+   JSON.stringify(job)
+ );
 
-    }
+ renderTracking();
 
-
-    document.getElementById("driverName")
-        .innerText =
-        job.driver.name;
-
-    document.getElementById("driverRating")
-        .innerText =
-        job.driver.rating;
-
-    document.getElementById("driverVehicle")
-        .innerText =
-        job.driver.vehicle;
-
-    document.getElementById("driverPlate")
-        .innerText =
-        job.driver.plate;
+}
 
 
-    const eta =
-        ["กำลังรอรถ", "25 นาที", "35 นาที", "45 นาที", "ถึงแล้ว"][
-            currentStatus
-        ];
+function renderTracking(){
 
-    document.getElementById("eta")
-        .innerText =
-        eta;
+ if(!currentJob)
+   return;
 
+ const job=currentJob;
 
-    if (currentStatus === 4) {
+ document.getElementById("trackingResult")
+ .classList.remove("hidden");
 
-        document.getElementById("reviewSection")
-            .classList.remove("hidden");
-
-    } else {
-
-        document.getElementById("reviewSection")
-            .classList.add("hidden");
-
-    }
+ document.getElementById("trackingJobId")
+ .innerText=job.id;
 
 
-    initTrackingMap();
+ const currentStatus=
+ Math.min(
+   Number(job.status)||0,
+   4
+ );
+
+ const progress=
+ [0,25,50,75,100][currentStatus];
+
+ document.getElementById("progressBar")
+ .style.width=progress+"%";
+
+ document.getElementById("progressText")
+ .innerText=progress+"%";
+
+ document.getElementById("statusBadge")
+ .innerText=
+ STATUS_NAMES[currentStatus];
+
+
+ for(let i=1;i<=5;i++){
+
+   const el=
+   document.getElementById("dot"+i);
+
+   if(i-1<=currentStatus){
+
+     el.className=
+     "w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0";
+
+   }else{
+
+     el.className=
+     "w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0";
+
+   }
+
+ }
+
+
+ const now=
+ new Date().toLocaleTimeString(
+   "th-TH",
+   {
+     hour:"2-digit",
+     minute:"2-digit"
+   }
+ );
+
+
+ for(let i=1;i<=5;i++){
+
+   document.getElementById("time"+i)
+   .innerText=
+   i<=currentStatus+1
+   ?`อัปเดต ${now} น.`
+   :"รอดำเนินการ";
+
+ }
+
+
+ document.getElementById("driverName")
+ .innerText=
+ job.driver?.name||"-";
+
+ document.getElementById("driverRating")
+ .innerText=
+ job.driver?.rating||"⭐ 4.9/5";
+
+ document.getElementById("driverVehicle")
+ .innerText=
+ job.driver?.vehicle||job.vehicle||"-";
+
+ document.getElementById("driverPlate")
+ .innerText=
+ job.driver?.plate||"-";
+
+
+ const eta=[
+   "กำลังรอรถ",
+   "25 นาที",
+   "35 นาที",
+   "45 นาที",
+   "ถึงแล้ว"
+ ][currentStatus];
+
+ document.getElementById("eta")
+ .innerText=eta;
+
+
+ if(currentStatus===4){
+
+   document.getElementById("reviewSection")
+   .classList.remove("hidden");
+
+   loadExistingReview();
+
+ }else{
+
+   document.getElementById("reviewSection")
+   .classList.add("hidden");
+
+ }
+
+
+ initTrackingMap();
+
+}
+
+
+function initTrackingMap(){
+
+ if(!currentJob)
+   return;
+
+ const pickup=[
+   currentJob.pickupLat,
+   currentJob.pickupLng
+ ];
+
+ const dropoff=[
+   currentJob.dropoffLat,
+   currentJob.dropoffLng
+ ];
+
+
+ if(!trackingMap){
+
+   trackingMap=
+   L.map("trackingMap")
+   .setView(
+     pickup,
+     11
+   );
+
+   L.tileLayer(
+     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+     {
+       attribution:"© OpenStreetMap contributors"
+     }
+   ).addTo(trackingMap);
+
+ }
+
+
+ trackingMap.invalidateSize();
+
+
+ if(driverMarker)
+   trackingMap.removeLayer(driverMarker);
+
+
+ const oldMarkers=
+ document.querySelectorAll(
+   ".tracking-generated"
+ );
+
+ oldMarkers.forEach(()=>{});
+
+
+ const status=
+ Math.min(
+   currentJob.status||0,
+   4
+ );
+
+
+ if(status>=4){
+
+   driverMarker=
+   L.marker(dropoff)
+   .addTo(trackingMap)
+   .bindPopup("🚚 รถถึงจุดส่งสินค้า")
+   .openPopup();
+
+ }else{
+
+   const progress=
+   [0.05,0.25,0.50,0.75][status]||0.05;
+
+   const lat=
+   pickup[0]+
+   (dropoff[0]-pickup[0])*progress;
+
+   const lng=
+   pickup[1]+
+   (dropoff[1]-pickup[1])*progress;
+
+   driverMarker=
+   L.marker([lat,lng])
+   .addTo(trackingMap)
+   .bindPopup("🚚 รถขนส่งของคุณ")
+   .openPopup();
+
+ }
+
+
+ L.marker(pickup)
+ .addTo(trackingMap)
+ .bindPopup("📦 จุดรับสินค้า");
+
+ L.marker(dropoff)
+ .addTo(trackingMap)
+ .bindPopup("🏁 จุดส่งสินค้า");
+
+
+ L.polyline(
+   [pickup,dropoff],
+   {
+     color:"#3b82f6",
+     weight:5,
+     opacity:.8,
+     dashArray:"8,8"
+   }
+ ).addTo(trackingMap);
+
+
+ trackingMap.fitBounds(
+   L.latLngBounds(
+     [pickup,dropoff]
+   ),
+   {
+     padding:[40,40]
+   }
+ );
 
 }
 
 
 /* =========================================================
-   TRACKING MAP
+ ADMIN LOGIN
 ========================================================= */
 
-function initTrackingMap() {
+function adminLogin(event){
 
-    const pickup = [
-        currentJob.pickupLat,
-        currentJob.pickupLng
-    ];
+ event.preventDefault();
 
-    const dropoff = [
-        currentJob.dropoffLat,
-        currentJob.dropoffLng
-    ];
+ const username=
+ document.getElementById("adminUsername").value.trim();
 
+ const password=
+ document.getElementById("adminPassword").value;
 
-    if (!trackingMap) {
+ if(
+   username==="admin"&&
+   password==="moveex123"
+ ){
 
-        trackingMap =
-            L.map("trackingMap")
-                .setView(
-                    pickup,
-                    11
-                );
+   localStorage.setItem(
+     "moveex_admin_logged",
+     "true"
+   );
 
-        L.tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-                attribution:
-                    "© OpenStreetMap contributors"
-            }
-        ).addTo(trackingMap);
+   showToast(
+     "เข้าสู่ระบบ Admin สำเร็จ"
+   );
 
-    }
+   setTimeout(()=>{
+     switchView("admin");
+   },500);
 
+ }else{
 
-    trackingMap.invalidateSize();
+   showToast(
+     "Username หรือ Password ไม่ถูกต้อง",
+     "error"
+   );
 
+ }
 
-    if (driverMarker) {
-        trackingMap.removeLayer(driverMarker);
-    }
-
-
-    if (currentJob.status >= 4) {
-
-        driverMarker =
-            L.marker(dropoff)
-                .addTo(trackingMap)
-                .bindPopup("🚚 รถถึงจุดส่งสินค้า")
-                .openPopup();
-
-    } else {
-
-        /*
-           จำลองตำแหน่งรถตาม Progress
-        */
-
-        const progress =
-            [0.05, 0.25, 0.50, 0.75][
-                currentJob.status
-            ] || 0.05;
-
-        const lat =
-            pickup[0] +
-            (dropoff[0] - pickup[0]) *
-            progress;
-
-        const lng =
-            pickup[1] +
-            (dropoff[1] - pickup[1]) *
-            progress;
+}
 
 
-        driverMarker =
-            L.marker([lat, lng])
-                .addTo(trackingMap)
-                .bindPopup("🚚 รถขนส่งของคุณ")
-                .openPopup();
+function adminLogout(){
 
-    }
+ localStorage.removeItem(
+   "moveex_admin_logged"
+ );
 
+ showToast(
+   "ออกจากระบบเรียบร้อย"
+ );
 
-    L.marker(pickup)
-        .addTo(trackingMap)
-        .bindPopup("📦 จุดรับสินค้า");
-
-
-    L.marker(dropoff)
-        .addTo(trackingMap)
-        .bindPopup("🏁 จุดส่งสินค้า");
-
-
-    L.polyline(
-        [pickup, dropoff],
-        {
-            color: "#3b82f6",
-            weight: 5,
-            opacity: .8,
-            dashArray: "8,8"
-        }
-    ).addTo(trackingMap);
-
-
-    trackingMap.fitBounds(
-        L.latLngBounds(
-            [pickup, dropoff]
-        ),
-        {
-            padding: [40, 40]
-        }
-    );
+ setTimeout(()=>{
+   switchView("landing");
+ },500);
 
 }
 
 
 /* =========================================================
-   DEMO STATUS UPDATE
+ ADMIN TAB
 ========================================================= */
 
-function advanceTracking() {
+function showAdminTab(tab){
 
-    if (!currentJob) {
-        return;
-    }
+ const tabs=[
+   "adminDashboardTab",
+   "adminJobsTab",
+   "adminReviewsTab",
+   "adminDriversTab"
+ ];
 
-    if (currentJob.status < 4) {
+ tabs.forEach(id=>{
+   document.getElementById(id)
+   .classList.add("hidden");
+ });
 
-        currentJob.status++;
 
-        localStorage.setItem(
-            "moveex_current_job",
-            JSON.stringify(currentJob)
-        );
+ const buttons=[
+   "adminTabDashboard",
+   "adminTabJobs",
+   "adminTabReviews",
+   "adminTabDrivers"
+ ];
 
-        renderTracking();
+ buttons.forEach(id=>{
 
-    }
+   document.getElementById(id)
+   .className=
+   "admin-tab bg-slate-800 px-4 py-2.5 rounded-xl text-sm font-semibold";
+
+ });
+
+
+ if(tab==="dashboard"){
+
+   document.getElementById("adminDashboardTab")
+   .classList.remove("hidden");
+
+   document.getElementById("adminTabDashboard")
+   .className=
+   "admin-tab bg-blue-600 px-4 py-2.5 rounded-xl text-sm font-semibold";
+
+   renderDashboard();
+
+ }
+
+ if(tab==="jobs"){
+
+   document.getElementById("adminJobsTab")
+   .classList.remove("hidden");
+
+   document.getElementById("adminTabJobs")
+   .className=
+   "admin-tab bg-blue-600 px-4 py-2.5 rounded-xl text-sm font-semibold";
+
+   renderAdminJobs();
+
+ }
+
+ if(tab==="reviews"){
+
+   document.getElementById("adminReviewsTab")
+   .classList.remove("hidden");
+
+   document.getElementById("adminTabReviews")
+   .className=
+   "admin-tab bg-blue-600 px-4 py-2.5 rounded-xl text-sm font-semibold";
+
+   renderAdminReviews();
+
+ }
+
+ if(tab==="drivers"){
+
+   document.getElementById("adminDriversTab")
+   .classList.remove("hidden");
+
+   document.getElementById("adminTabDrivers")
+   .className=
+   "admin-tab bg-blue-600 px-4 py-2.5 rounded-xl text-sm font-semibold";
+
+   renderDrivers();
+
+ }
+
+}
+
+
+/* =========================================================
+ ADMIN DASHBOARD
+========================================================= */
+
+function refreshAdmin(){
+
+ showAdminTab("dashboard");
+
+ updateHeroStats();
+
+}
+
+
+function renderDashboard(){
+
+ const jobs=getJobs();
+
+ const total=jobs.length;
+
+ const active=
+ jobs.filter(
+   job=>job.status<4
+ ).length;
+
+ const complete=
+ jobs.filter(
+   job=>job.status===4
+ ).length;
+
+ const revenue=
+ jobs.reduce(
+   (sum,job)=>sum+(Number(job.total)||0),
+   0
+ );
+
+
+ document.getElementById("statTotal")
+ .innerText=total;
+
+ document.getElementById("statActive")
+ .innerText=active;
+
+ document.getElementById("statComplete")
+ .innerText=complete;
+
+ document.getElementById("statRevenue")
+ .innerText=
+ "฿"+revenue.toLocaleString();
+
+
+ for(let i=0;i<5;i++){
+
+   const count=
+   jobs.filter(
+     job=>Number(job.status)===i
+   ).length;
+
+   const percent=
+   total
+   ?Math.round(count/total*100)
+   :0;
+
+   document.getElementById("count"+i)
+   .innerText=count;
+
+   document.getElementById("bar"+i)
+   .style.width=percent+"%";
+
+ }
+
+
+ const recent=
+ jobs
+ .slice()
+ .sort(
+   (a,b)=>
+   new Date(b.createdAt)-
+   new Date(a.createdAt)
+ )
+ .slice(0,5);
+
+
+ const container=
+ document.getElementById("recentJobs");
+
+ if(!recent.length){
+
+   container.innerHTML=
+   `<div class="text-center py-10 text-slate-500">
+     ยังไม่มีงานขนส่ง
+   </div>`;
+
+   return;
+ }
+
+
+ container.innerHTML=
+ recent.map(job=>`
+
+ <div onclick="openJobModal('${job.id}')"
+ class="bg-slate-800 hover:bg-slate-700 rounded-xl p-4 cursor-pointer flex justify-between items-center">
+
+ <div>
+ <p class="font-bold text-blue-400">${escapeHTML(job.id)}</p>
+ <p class="text-xs text-slate-400 mt-1">
+ ${escapeHTML(job.customer)}
+ </p>
+ </div>
+
+ <div class="text-right">
+ <span class="text-xs px-2 py-1 rounded-full bg-${STATUS_COLORS[job.status]}-500/10 text-${STATUS_COLORS[job.status]}-400">
+ ${STATUS_NAMES[job.status]}
+ </span>
+ <p class="text-sm font-bold mt-2">
+ ฿${Number(job.total||0).toLocaleString()}
+ </p>
+ </div>
+
+ </div>
+
+ `).join("");
+
+}
+
+
+function updateHeroStats(){
+
+ const el=document.getElementById("heroJobs");
+
+ if(el)
+   el.innerText=
+   getJobs().length.toLocaleString();
+
+}
+
+
+/* =========================================================
+ ADMIN JOB TABLE
+========================================================= */
+
+function renderAdminJobs(){
+
+ const tbody=
+ document.getElementById("adminJobsTable");
+
+ if(!tbody)
+   return;
+
+ let jobs=getJobs();
+
+ const search=
+ (document.getElementById("adminSearch")?.value||"")
+ .toLowerCase()
+ .trim();
+
+ const filter=
+ document.getElementById("adminStatusFilter")?.value||"all";
+
+
+ if(search){
+
+   jobs=jobs.filter(job=>
+
+     String(job.id).toLowerCase().includes(search)||
+     String(job.customer).toLowerCase().includes(search)||
+     String(job.phone).toLowerCase().includes(search)
+
+   );
+
+ }
+
+
+ if(filter!=="all"){
+
+   jobs=
+   jobs.filter(
+     job=>String(job.status)===filter
+   );
+
+ }
+
+
+ jobs.sort(
+   (a,b)=>
+   new Date(b.createdAt)-
+   new Date(a.createdAt)
+ );
+
+
+ if(!jobs.length){
+
+   tbody.innerHTML=`
+   <tr>
+   <td colspan="6"
+   class="py-12 text-center text-slate-500">
+   ไม่พบข้อมูลงาน
+   </td>
+   </tr>`;
+
+   return;
+ }
+
+
+ tbody.innerHTML=
+ jobs.map(job=>`
+
+ <tr class="border-b border-slate-800 hover:bg-slate-800/50">
+
+ <td class="py-4 pr-4">
+
+ <button
+ onclick="openJobModal('${job.id}')"
+ class="font-bold text-blue-400 hover:text-blue-300">
+
+ ${escapeHTML(job.id)}
+
+ </button>
+
+ <p class="text-xs text-slate-500 mt-1">
+ ${formatDate(job.createdAt)}
+ </p>
+
+ </td>
+
+
+ <td class="py-4 pr-4">
+
+ <p class="font-semibold">
+ ${escapeHTML(job.customer)}
+ </p>
+
+ <p class="text-xs text-slate-400">
+ ${escapeHTML(job.phone)}
+ </p>
+
+ </td>
+
+
+ <td class="py-4 pr-4">
+ ${escapeHTML(job.vehicle)}
+ </td>
+
+
+ <td class="py-4 pr-4 font-bold text-blue-400">
+ ฿${Number(job.total||0).toLocaleString()}
+ </td>
+
+
+ <td class="py-4 pr-4">
+
+ <select
+ onchange="changeJobStatus('${job.id}',this.value)"
+ class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-xs">
+
+ ${STATUS_NAMES.map(
+ (name,index)=>`
+
+ <option
+ value="${index}"
+ ${Number(job.status)===index?"selected":""}>
+ ${name}
+ </option>
+
+ `).join("")}
+
+ </select>
+
+ </td>
+
+
+ <td class="py-4">
+
+ <div class="flex gap-2">
+
+ <button
+ onclick="openJobModal('${job.id}')"
+ class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white">
+ <i class="fa-solid fa-eye"></i>
+ </button>
+
+ <button
+ onclick="deleteJob('${job.id}')"
+ class="w-9 h-9 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white">
+ <i class="fa-solid fa-trash"></i>
+ </button>
+
+ </div>
+
+ </td>
+
+ </tr>
+
+ `).join("");
+
+}
+
+
+/* =========================================================
+ CHANGE STATUS
+========================================================= */
+
+function changeJobStatus(jobId,status){
+
+ const jobs=getJobs();
+
+ const index=
+ jobs.findIndex(
+   job=>job.id===jobId
+ );
+
+ if(index===-1)
+   return;
+
+ jobs[index].status=
+ parseInt(status);
+
+ jobs[index].updatedAt=
+ new Date().toISOString();
+
+ saveJobs(jobs);
+
+ if(
+   currentJob&&
+   currentJob.id===jobId
+ ){
+
+   currentJob=jobs[index];
+
+   localStorage.setItem(
+     "moveex_current_job",
+     JSON.stringify(currentJob)
+   );
+
+   if(
+     !document.getElementById("trackingView")
+     .classList.contains("hidden")
+   ){
+
+     renderTracking();
+
+   }
+
+ }
+
+ showToast(
+   `อัปเดตสถานะ ${jobId} เป็น "${STATUS_NAMES[status]}" แล้ว`
+ );
+
+ renderAdminJobs();
+ renderDashboard();
+
+}
+
+
+/* =========================================================
+ DELETE JOB
+========================================================= */
+
+function deleteJob(jobId){
+
+ const jobs=getJobs();
+
+ const job=
+ jobs.find(
+   item=>item.id===jobId
+ );
+
+ if(!job)
+   return;
+
+ if(
+   !confirm(
+     `ต้องการลบงาน ${jobId} ใช่หรือไม่?`
+   )
+ ){
+   return;
+ }
+
+
+ const newJobs=
+ jobs.filter(
+   item=>item.id!==jobId
+ );
+
+ saveJobs(newJobs);
+
+ const reviews=
+ getReviews().filter(
+   review=>review.jobId!==jobId
+ );
+
+ saveReviews(reviews);
+
+
+ if(
+   currentJob&&
+   currentJob.id===jobId
+ ){
+
+   localStorage.removeItem(
+     "moveex_current_job"
+   );
+
+   currentJob=null;
+
+ }
+
+
+ showToast(
+   "ลบงานเรียบร้อยแล้ว"
+ );
+
+ renderAdminJobs();
+ renderDashboard();
+
+}
+
+
+/* =========================================================
+ JOB DETAIL
+========================================================= */
+
+function openJobModal(jobId){
+
+ const job=
+ getJobs().find(
+   item=>item.id===jobId
+ );
+
+ if(!job)
+   return;
+
+ const review=
+ getReviews().find(
+   item=>item.jobId===jobId
+ );
+
+
+ document.getElementById("jobModalContent")
+ .innerHTML=`
+
+ <div class="grid md:grid-cols-2 gap-4">
+
+ <div class="bg-slate-900 rounded-xl p-5">
+
+ <p class="text-xs text-slate-400">เลขที่งาน</p>
+ <p class="text-xl font-black text-blue-400 mt-1">
+ ${escapeHTML(job.id)}
+ </p>
+
+ <p class="text-xs text-slate-400 mt-4">สถานะ</p>
+
+ <span class="inline-block mt-1 px-3 py-1 rounded-full bg-${STATUS_COLORS[job.status]}-500/10 text-${STATUS_COLORS[job.status]}-400 text-sm">
+ ${STATUS_NAMES[job.status]}
+ </span>
+
+ </div>
+
+
+ <div class="bg-slate-900 rounded-xl p-5">
+
+ <p class="text-xs text-slate-400">วันที่จอง</p>
+ <p class="font-semibold mt-1">
+ ${escapeHTML(job.bookingDate||"-")}
+ </p>
+
+ <p class="text-xs text-slate-400 mt-4">สร้างรายการ</p>
+ <p class="font-semibold mt-1">
+ ${formatDate(job.createdAt)}
+ </p>
+
+ </div>
+
+ </div>
+
+
+ <div class="grid md:grid-cols-2 gap-4 mt-4">
+
+ <div class="bg-slate-900 rounded-xl p-5">
+
+ <h3 class="font-bold text-blue-400 mb-4">
+ <i class="fa-solid fa-user mr-2"></i>
+ ข้อมูลลูกค้า
+ </h3>
+
+ <p class="text-sm">
+ <span class="text-slate-400">ชื่อ:</span>
+ ${escapeHTML(job.customer)}
+ </p>
+
+ <p class="text-sm mt-2">
+ <span class="text-slate-400">โทร:</span>
+ ${escapeHTML(job.phone)}
+ </p>
+
+ </div>
+
+
+ <div class="bg-slate-900 rounded-xl p-5">
+
+ <h3 class="font-bold text-blue-400 mb-4">
+ <i class="fa-solid fa-truck mr-2"></i>
+ ข้อมูลรถ
+ </h3>
+
+ <p class="text-sm">
+ <span class="text-slate-400">รถ:</span>
+ ${escapeHTML(job.vehicle)}
+ </p>
+
+ <p class="text-sm mt-2">
+ <span class="text-slate-400">ทะเบียน:</span>
+ ${escapeHTML(job.driver?.plate||"-")}
+ </p>
+
+ <p class="text-sm mt-2">
+ <span class="text-slate-400">คนขับ:</span>
+ ${escapeHTML(job.driver?.name||"-")}
+ </p>
+
+ </div>
+
+ </div>
+
+
+ <div class="bg-slate-900 rounded-xl p-5 mt-4">
+
+ <h3 class="font-bold text-blue-400 mb-4">
+ <i class="fa-solid fa-route mr-2"></i>
+ เส้นทาง
+ </h3>
+
+ <div class="grid md:grid-cols-2 gap-4 text-sm">
+
+ <div>
+ <p class="text-xs text-slate-400">จุดรับ</p>
+ <p class="mt-1">
+ ${escapeHTML(job.pickup)}
+ </p>
+ </div>
+
+ <div>
+ <p class="text-xs text-slate-400">จุดส่ง</p>
+ <p class="mt-1">
+ ${escapeHTML(job.dropoff)}
+ </p>
+ </div>
+
+ </div>
+
+ </div>
+
+
+ <div class="bg-slate-900 rounded-xl p-5 mt-4">
+
+ <div class="flex justify-between">
+
+ <span class="font-bold">ระยะทาง</span>
+
+ <span>
+ ${Number(job.distance||0).toFixed(1)} กม.
+ </span>
+
+ </div>
+
+ <div class="flex justify-between mt-3">
+
+ <span class="font-bold">ราคาสุทธิ</span>
+
+ <span class="font-black text-xl text-blue-400">
+ ฿${Number(job.total||0).toLocaleString()}
+ </span>
+
+ </div>
+
+ </div>
+
+
+ <div class="bg-slate-900 rounded-xl p-5 mt-4">
+
+ <h3 class="font-bold mb-3">
+ <i class="fa-solid fa-star text-yellow-400 mr-2"></i>
+ รีวิว
+ </h3>
+
+ ${
+ review
+ ?
+ `<div class="text-yellow-400 text-xl">
+ ${"★".repeat(review.rating)}
+ ${"☆".repeat(5-review.rating)}
+ </div>
+ <p class="text-sm text-slate-400 mt-3">
+ ${escapeHTML(review.comment||"ไม่ได้ระบุความคิดเห็น")}
+ </p>`
+ :
+ `<p class="text-sm text-slate-500">
+ ยังไม่มีรีวิว
+ </p>`
+ }
+
+ </div>
+
+
+ <div class="mt-5 flex gap-2">
+
+ <select
+ onchange="changeJobStatus('${job.id}',this.value);closeJobModal()"
+ class="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-3">
+
+ ${STATUS_NAMES.map(
+ (name,index)=>`
+
+ <option
+ value="${index}"
+ ${Number(job.status)===index?"selected":""}>
+ เปลี่ยนสถานะ: ${name}
+ </option>
+
+ `).join("")}
+
+ </select>
+
+ </div>
+ `;
+
+
+ document.getElementById("jobModal")
+ .classList.remove("hidden");
+
+}
+
+
+function closeJobModal(){
+
+ document.getElementById("jobModal")
+ .classList.add("hidden");
+
+}
+
+
+/* =========================================================
+ REVIEWS ADMIN
+========================================================= */
+
+function renderAdminReviews(){
+
+ const container=
+ document.getElementById("adminReviewsList");
+
+ const reviews=getReviews();
+
+ if(!reviews.length){
+
+   container.innerHTML=`
+   <div class="md:col-span-2 text-center py-16 text-slate-500">
+   ยังไม่มีรีวิวจากลูกค้า
+   </div>`;
+
+   return;
+ }
+
+
+ container.innerHTML=
+ reviews
+ .slice()
+ .reverse()
+ .map(review=>{
+
+   const job=
+   getJobs().find(
+     job=>job.id===review.jobId
+   );
+
+   return `
+
+   <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5">
+
+   <div class="flex justify-between">
+
+   <div>
+   <p class="font-bold text-blue-400">
+   ${escapeHTML(review.jobId)}
+   </p>
+
+   <p class="text-xs text-slate-400 mt-1">
+   ${escapeHTML(job?.customer||"ไม่พบข้อมูล")}
+   </p>
+   </div>
+
+   <div class="text-yellow-400">
+   ${"★".repeat(review.rating)}
+   ${"☆".repeat(5-review.rating)}
+   </div>
+
+   </div>
+
+   <p class="text-sm text-slate-300 mt-5">
+   ${escapeHTML(review.comment||"ไม่ได้เขียนความคิดเห็น")}
+   </p>
+
+   <p class="text-xs text-slate-500 mt-4">
+   ${formatDate(review.createdAt)}
+   </p>
+
+   </div>
+
+   `;
+
+ })
+ .join("");
+
+}
+
+
+/* =========================================================
+ DRIVERS
+========================================================= */
+
+function renderDrivers(){
+
+ const container=
+ document.getElementById("adminDriversList");
+
+ const jobs=getJobs();
+
+ const driverMap={};
+
+ jobs.forEach(job=>{
+
+   if(!job.driver)
+     return;
+
+   const key=
+   job.driver.plate||
+   job.driver.name;
+
+   if(!driverMap[key]){
+
+     driverMap[key]={
+       ...job.driver,
+       jobs:0,
+       completed:0
+     };
+
+   }
+
+   driverMap[key].jobs++;
+
+   if(job.status===4)
+     driverMap[key].completed++;
+
+ });
+
+
+ const drivers=
+ Object.values(driverMap);
+
+
+ if(!drivers.length){
+
+   container.innerHTML=`
+   <div class="md:col-span-3 text-center py-16 text-slate-500">
+   ยังไม่มีข้อมูลคนขับ
+   </div>`;
+
+   return;
+ }
+
+
+ container.innerHTML=
+ drivers.map(driver=>`
+
+ <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+
+ <div class="flex items-center gap-4">
+
+ <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xl">
+ <i class="fa-solid fa-user"></i>
+ </div>
+
+ <div>
+ <h3 class="font-bold">
+ ${escapeHTML(driver.name)}
+ </h3>
+ <p class="text-yellow-400 text-sm mt-1">
+ ${escapeHTML(driver.rating)}
+ </p>
+ </div>
+
+ </div>
+
+ <div class="grid grid-cols-2 gap-3 mt-5">
+
+ <div class="bg-slate-900 rounded-xl p-3">
+ <p class="text-xs text-slate-400">รถ</p>
+ <p class="text-sm font-semibold mt-1">
+ ${escapeHTML(driver.vehicle)}
+ </p>
+ </div>
+
+ <div class="bg-slate-900 rounded-xl p-3">
+ <p class="text-xs text-slate-400">ทะเบียน</p>
+ <p class="text-sm font-semibold mt-1">
+ ${escapeHTML(driver.plate)}
+ </p>
+ </div>
+
+ </div>
+
+ <div class="flex justify-between text-sm mt-5">
+
+ <span>งานทั้งหมด</span>
+ <b>${driver.jobs}</b>
+
+ </div>
+
+ <div class="flex justify-between text-sm mt-2">
+
+ <span>งานสำเร็จ</span>
+ <b class="text-emerald-400">
+ ${driver.completed}
+ </b>
+
+ </div>
+
+ </div>
+
+ `).join("");
+
+}
+
+
+/* =========================================================
+ REVIEW CUSTOMER
+========================================================= */
+
+function setRating(rating){
+
+ currentRating=rating;
+
+ const stars=
+ document.querySelectorAll(".star");
+
+ stars.forEach(
+ (star,index)=>{
+
+   if(index<rating){
+
+     star.classList.remove(
+       "text-slate-600"
+     );
+
+     star.classList.add(
+       "text-yellow-400"
+     );
+
+   }else{
+
+     star.classList.remove(
+       "text-yellow-400"
+     );
+
+     star.classList.add(
+       "text-slate-600"
+     );
+
+   }
+
+ });
+
+
+ const text=[
+   "",
+   "แย่มาก",
+   "ไม่ค่อยดี",
+   "พอใช้",
+   "ดีมาก",
+   "ยอดเยี่ยม"
+ ];
+
+ document.getElementById("ratingText")
+ .innerText=
+ `${rating} ดาว - ${text[rating]}`;
+
+}
+
+
+function submitReview(){
+
+ if(!currentJob)
+   return;
+
+ if(currentRating===0){
+
+   showToast(
+     "กรุณาเลือกคะแนนก่อนส่งรีวิว",
+     "error"
+   );
+
+   return;
+ }
+
+
+ const comment=
+ document.getElementById("reviewComment")
+ .value.trim();
+
+
+ const reviews=getReviews();
+
+ const existing=
+ reviews.findIndex(
+   review=>review.jobId===currentJob.id
+ );
+
+
+ const review={
+   jobId:currentJob.id,
+   rating:currentRating,
+   comment:comment,
+   createdAt:new Date().toISOString()
+ };
+
+
+ if(existing>=0){
+
+   reviews[existing]=review;
+
+ }else{
+
+   reviews.push(review);
+
+ }
+
+
+ saveReviews(reviews);
+
+
+ renderReviewSuccess(
+   review
+ );
+
+ showToast(
+   "ส่งรีวิวเรียบร้อยแล้ว ⭐"
+ );
+
+}
+
+
+function loadExistingReview(){
+
+ if(!currentJob)
+   return;
+
+ const review=
+ getReviews().find(
+   item=>item.jobId===currentJob.id
+ );
+
+ if(review){
+
+   renderReviewSuccess(
+     review,
+     false
+   );
+
+ }
+
+}
+
+
+function renderReviewSuccess(
+ review,
+ showMessage=true
+){
+
+ const section=
+ document.getElementById("reviewSection");
+
+ section.innerHTML=`
+
+ <div class="text-center py-8">
+
+ <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-3xl">
+ <i class="fa-solid fa-check"></i>
+ </div>
+
+ <h2 class="text-2xl font-bold mt-5">
+ ขอบคุณสำหรับรีวิว!
+ </h2>
+
+ <div class="text-yellow-400 text-3xl mt-4">
+ ${"★".repeat(review.rating)}
+ <span class="text-slate-600">
+ ${"★".repeat(5-review.rating)}
+ </span>
+ </div>
+
+ ${
+ review.comment
+ ?
+ `<p class="text-slate-400 text-sm mt-4">
+ "${escapeHTML(review.comment)}"
+ </p>`
+ :
+ ""
+ }
+
+ <p class="text-xs text-slate-500 mt-4">
+ รีวิวของคุณถูกบันทึกเรียบร้อยแล้ว
+ </p>
+
+ </div>
+ `;
+
+}
+
+
+/* =========================================================
+ AUTO DEMO TRACKING
+========================================================= */
+
+function advanceTracking(){
+
+ if(!currentJob)
+   return;
+
+ if(currentJob.status>=4)
+   return;
+
+ const jobs=getJobs();
+
+ const index=
+ jobs.findIndex(
+   job=>job.id===currentJob.id
+ );
+
+ if(index===-1)
+   return;
+
+ jobs[index].status++;
+
+ jobs[index].updatedAt=
+ new Date().toISOString();
+
+ saveJobs(jobs);
+
+ currentJob=jobs[index];
+
+ localStorage.setItem(
+   "moveex_current_job",
+   JSON.stringify(currentJob)
+ );
+
+ if(
+   !document
+   .getElementById("trackingView")
+   .classList.contains("hidden")
+ ){
+
+   renderTracking();
+
+ }
 
 }
 
 
 /*
-   สำหรับ Demo:
-   ระบบจะเลื่อนสถานะทุก 15 วินาที
-
-   ในระบบจริงควรรับสถานะจาก Backend
-   หรือ WebSocket/API ของคนขับ
+ Demo:
+ เลื่อนสถานะอัตโนมัติทุก 30 วินาที
+ ถ้าไม่ต้องการ Demo ให้ลบบล็อก setInterval นี้
 */
 
-setInterval(() => {
+setInterval(()=>{
 
-    if (
-        currentJob &&
-        !document
-            .getElementById("trackingView")
-            .classList.contains("hidden")
-    ) {
+ if(
+   currentJob&&
+   !document
+   .getElementById("trackingView")
+   .classList.contains("hidden")
+ ){
 
-        advanceTracking();
+   advanceTracking();
 
-    }
+ }
 
-}, 15000);
+},30000);
 
 
 /* =========================================================
-   REVIEW
+ UTILITIES
 ========================================================= */
 
-function setRating(rating) {
+function formatDate(date){
 
-    currentRating =
-        rating;
+ if(!date)
+   return "-";
 
-    const stars =
-        document.querySelectorAll(".star");
+ try{
 
-    stars.forEach((star, index) => {
+   return new Date(date)
+   .toLocaleString(
+     "th-TH",
+     {
+       dateStyle:"medium",
+       timeStyle:"short"
+     }
+   );
 
-        if (index < rating) {
+ }catch(e){
 
-            star.classList.remove(
-                "text-slate-600"
-            );
+   return date;
 
-            star.classList.add(
-                "text-yellow-400"
-            );
-
-        } else {
-
-            star.classList.remove(
-                "text-yellow-400"
-            );
-
-            star.classList.add(
-                "text-slate-600"
-            );
-
-        }
-
-    });
-
-
-    const text = [
-        "",
-        "แย่มาก",
-        "ไม่ค่อยดี",
-        "พอใช้",
-        "ดีมาก",
-        "ยอดเยี่ยม"
-    ];
-
-    document.getElementById("ratingText")
-        .innerText =
-        `${rating} ดาว - ${text[rating]}`;
+ }
 
 }
 
 
-function submitReview() {
+function escapeHTML(value){
 
-    if (currentRating === 0) {
-
-        showToast(
-            "กรุณาเลือกคะแนนก่อนส่งรีวิว",
-            "error"
-        );
-
-        return;
-    }
-
-
-    const comment =
-        document.getElementById(
-            "reviewComment"
-        ).value.trim();
-
-
-    const review = {
-
-        jobId:
-            currentJob.id,
-
-        rating:
-            currentRating,
-
-        comment:
-            comment,
-
-        createdAt:
-            new Date().toLocaleString(
-                "th-TH"
-            )
-
-    };
-
-
-    localStorage.setItem(
-        "moveex_review_" + currentJob.id,
-        JSON.stringify(review)
-    );
-
-
-    document.getElementById(
-        "reviewSection"
-    ).innerHTML = `
-
-        <div class="text-center py-8">
-
-            <div class="w-16 h-16 mx-auto rounded-full
-                        bg-emerald-500/10 text-emerald-400
-                        flex items-center justify-center text-3xl">
-
-                <i class="fa-solid fa-check"></i>
-
-            </div>
-
-            <h2 class="text-2xl font-bold mt-5">
-                ขอบคุณสำหรับรีวิว!
-            </h2>
-
-            <div class="text-yellow-400 text-3xl mt-4">
-                ${"★".repeat(currentRating)}
-                <span class="text-slate-600">
-                    ${"★".repeat(5-currentRating)}
-                </span>
-            </div>
-
-            ${
-                comment
-                ? `<p class="text-slate-400 text-sm mt-4">
-                    "${comment}"
-                   </p>`
-                : ""
-            }
-
-            <p class="text-xs text-slate-500 mt-4">
-                รีวิวของคุณถูกบันทึกเรียบร้อยแล้ว
-            </p>
-
-        </div>
-
-    `;
-
-
-    showToast(
-        "ส่งรีวิวเรียบร้อยแล้ว ขอบคุณครับ ⭐"
-    );
+ return String(value??"")
+ .replace(/&/g,"&amp;")
+ .replace(/</g,"&lt;")
+ .replace(/>/g,"&gt;")
+ .replace(/"/g,"&quot;")
+ .replace(/'/g,"&#039;");
 
 }
 
 
 /* =========================================================
-   DATE DEFAULT
+ INIT
 ========================================================= */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+ "DOMContentLoaded",
+ ()=>{
 
-        const dateInput =
-            document.getElementById(
-                "bookingDate"
-            );
+   const dateInput=
+   document.getElementById(
+     "bookingDate"
+   );
 
-        if (dateInput) {
+   if(dateInput){
 
-            const today =
-                new Date();
+     const today=
+     new Date();
 
-            const yyyy =
-                today.getFullYear();
+     const yyyy=
+     today.getFullYear();
 
-            const mm =
-                String(
-                    today.getMonth() + 1
-                ).padStart(2, "0");
+     const mm=
+     String(
+       today.getMonth()+1
+     ).padStart(2,"0");
 
-            const dd =
-                String(
-                    today.getDate()
-                ).padStart(2, "0");
+     const dd=
+     String(
+       today.getDate()
+     ).padStart(2,"0");
 
-            dateInput.min =
-                `${yyyy}-${mm}-${dd}`;
+     dateInput.min=
+     `${yyyy}-${mm}-${dd}`;
 
-        }
+     dateInput.value=
+     `${yyyy}-${mm}-${dd}`;
 
-    }
+   }
+
+   updateHeroStats();
+
+ }
 );
+
+
+/* ป้องกัน modal ปิด/เปิดผิดจากการกดพื้นที่ */
+document.getElementById("jobModal")
+.addEventListener("click",function(e){
+
+ if(e.target===this)
+   closeJobModal();
+
+});
 
 </script>
 
